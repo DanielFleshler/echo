@@ -192,19 +192,18 @@ export default function SignupPage() {
 									placeholder="johndoe"
 									type="text"
 									value={form.values.username}
-									onChange={(e) => {
-										e.target.value = e.target.value.toLowerCase();
-										form.setValues({
-											...form.values,
-											username: e.target.value,
-										});
-									}}
+									onChange={form.handleChange}
 									className={`w-full rounded-md border ${
 										form.errors.username ? "border-red-500" : "border-gray-800"
 									} bg-gray-900 pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`}
 								/>
 								<UserCircle className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
 							</div>
+							{form.values.username && (
+								<p className="text-xs text-gray-400">
+									Username will be: {form.values.username.toLowerCase()}
+								</p>
+							)}
 							{form.errors.username && (
 								<p className="text-xs text-red-400 mt-1">
 									{form.errors.username}
