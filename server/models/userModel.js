@@ -114,6 +114,14 @@ const userSchema = new Schema(
 		passwordChangedAt: Date,
 		passwordResetToken: String,
 		passwordResetExpires: Date,
+		refreshToken: {
+			type: String,
+			select: false,
+		},
+		refreshTokenExpiry: {
+			type: Date,
+			select: false,
+		},
 	},
 	{
 		timestamps: true,
@@ -169,6 +177,23 @@ userSchema.methods.generateAuthToken = function () {
 	});
 };
 
+userSchema.methods.generateRefreshToken = function () {
+	const refreshToken = crypto.randomBytes(40).toString("hex");
+
+	// Hash the refresh token before storing
+	this.refreshToken = crypto
+		.createHash("sha256")
+		.update(refreshToken)
+		.digest("hex");
+
+	// Set expiration time (7 days by default, or use env variable)
+	const refreshExpiry = process.env.REFRESH_TOKEN_EXPIRES_IN || 7;
+	this.refreshTokenExpiry = Date.now() + refreshExpiry * 24 * 60 * 60 * 1000;
+
+	// Return the unhashed token to send to client
+	return refreshToken;
+};
+
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 	if (this.passwordChangedAt) {
 		const changedTimestamp = parseInt(
@@ -198,30 +223,24 @@ userSchema.methods.createPasswordResetToken = function () {
 userSchema.methods.generateOTP = function () {
 	// Generate a 6-digit OTP
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
-	
+
 	// Hash the OTP before storing
-	this.otpCode = crypto
-		.createHash("sha256")
-		.update(otp)
-		.digest("hex");
-	
+	this.otpCode = crypto.createHash("sha256").update(otp).digest("hex");
+
 	// Set expiration time (10 minutes)
 	this.otpExpires = Date.now() + 10 * 60 * 1000;
-	
+
 	// Reset attempts and update last request time
 	this.otpAttempts = 0;
 	this.otpLastRequest = Date.now();
-	
+
 	return otp;
 };
 
 userSchema.methods.verifyOTP = function (otp) {
 	// Hash the provided OTP to compare with stored hash
-	const hashedOTP = crypto
-		.createHash("sha256")
-		.update(otp)
-		.digest("hex");
-	
+	const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+
 	// Check if OTP is valid and not expired
 	return this.otpCode === hashedOTP && this.otpExpires > Date.now();
 };
