@@ -2,13 +2,13 @@ import { useState, useCallback } from 'react';
 
 export const useForm = ({
   initialValues,
-  validate, // (values) => errors object
-  onSubmit,   // async (values) => void
+  validate, 
+  onSubmit,   
 }) => {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null); // For API/general submission errors
+  const [submitError, setSubmitError] = useState(null);
 
   const handleChange = useCallback((event) => {
     const { name, value, type, checked } = event.target;
