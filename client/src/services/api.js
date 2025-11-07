@@ -25,16 +25,33 @@ api.interceptors.response.use(
 	async (error) => {
 		const originalRequest = error.config;
 
-		// If error is 401 and we haven't tried to refresh yet
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		const isAuthEndpoint =
+			originalRequest.url?.includes("/users/login") ||
+			originalRequest.url?.includes("/users/signup") ||
+			originalRequest.url?.includes("/users/verify-otp") ||
+			originalRequest.url?.includes("/users/forgot-password") ||
+			originalRequest.url?.includes("/users/reset-password") ||
+			originalRequest.url?.includes("/users/refresh-token");
+		if (
+			error.response?.status === 401 &&
+			!originalRequest._retry &&
+			!isAuthEndpoint
+		) {
 			originalRequest._retry = true;
 
 			try {
 				// Get refresh token from localStorage
 				const refreshToken = localStorage.getItem("refreshToken");
 
+				console.log('[API Interceptor] 401 detected:', {
+					url: originalRequest.url,
+					hasRefreshToken: !!refreshToken,
+					errorMessage: error.response?.data?.message
+				});
+
 				if (!refreshToken) {
 					// No refresh token available, redirect to login
+					console.log('[API Interceptor] No refresh token, redirecting to login');
 					localStorage.removeItem("token");
 					localStorage.removeItem("refreshToken");
 					localStorage.removeItem("user");
@@ -51,6 +68,7 @@ api.interceptors.response.use(
 
 				// Save new tokens (tokens are at root level of response.data)
 				const { token, refreshToken: newRefreshToken } = response.data;
+				console.log('[API Interceptor] Token refresh successful');
 				localStorage.setItem("token", token);
 				localStorage.setItem("refreshToken", newRefreshToken);
 
@@ -61,6 +79,7 @@ api.interceptors.response.use(
 				return api(originalRequest);
 			} catch (refreshError) {
 				// Refresh failed, clear storage and redirect to login
+				console.log('[API Interceptor] Token refresh failed:', refreshError.response?.data?.message);
 				localStorage.removeItem("token");
 				localStorage.removeItem("refreshToken");
 				localStorage.removeItem("user");
