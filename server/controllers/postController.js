@@ -479,14 +479,28 @@ exports.renewPost = async (req, res) => {
 
 exports.incrementViews = async (req, res) => {
 	try {
-		const post = await Post.findByIdAndUpdate(
-			req.params.id,
+		// Only increment if the post is NOT authored by the current user
+		const post = await Post.findOneAndUpdate(
+			{
+				_id: req.params.id,
+				user: { $ne: req.user._id }  // Exclude own posts
+			},
 			{ $inc: { views: 1 } },
 			{ new: true }
 		);
 
 		if (!post) {
-			return sendError(res, 404, "Post not found");
+			// Post not found OR user is the author (no view increment)
+			const existingPost = await Post.findById(req.params.id);
+			if (!existingPost) {
+				return sendError(res, 404, "Post not found");
+			}
+			// Post exists but user is author - return current view count without incrementing
+			return sendSuccess(res, 200, "Post view not incremented (own post)", {
+				data: {
+					views: existingPost.views,
+				},
+			});
 		}
 
 		return sendSuccess(res, 200, "Post views updated successfully", {
@@ -509,10 +523,25 @@ exports.batchIncrementViews = async (req, res) => {
 			return sendError(res, 400, "Valid postIds array is required");
 		}
 
+		// Only increment views for posts NOT authored by the current user
 		const result = await Post.updateMany(
-			{ _id: { $in: postIds } },
+			{
+				_id: { $in: postIds },
+				user: { $ne: req.user._id }  // Exclude own posts
+			},
 			{ $inc: { views: 1 } }
 		);
+
+		// Get updated view counts for the modified posts
+		const updatedPosts = await Post.find(
+			{ _id: { $in: postIds } },
+			{ _id: 1, views: 1 }
+		);
+
+		const updatedCounts = {};
+		updatedPosts.forEach(post => {
+			updatedCounts[post._id.toString()] = post.views;
+		});
 
 		return sendSuccess(
 			res,
@@ -521,6 +550,7 @@ exports.batchIncrementViews = async (req, res) => {
 			{
 				data: {
 					modifiedCount: result.modifiedCount,
+					updatedCounts: updatedCounts,
 				},
 			}
 		);

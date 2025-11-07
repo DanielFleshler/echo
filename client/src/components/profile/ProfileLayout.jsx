@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePost } from "../../context/PostContext";
 import UserService from "../../services/user.service";
+import ErrorMessage from "../UI/ErrorMessage";
 import FollowersModal from "../UI/FollowersModal";
+import LoadingSpinner from "../UI/LoadingSpinner";
 import ProfileContent from "./ProfileContent";
 import ProfileHeader from "./ProfileHeader";
 import ProfileMedia from "./ProfileMedia";
 import ProfilePosts from "./ProfilePosts";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
-import LoadingSpinner from "../UI/LoadingSpinner";
-import ErrorMessage from "../UI/ErrorMessage";
 
 export default function ProfileLayout({ userId }) {
 	const { user } = useAuth();
@@ -57,9 +57,13 @@ export default function ProfileLayout({ userId }) {
 			} catch (error) {
 				console.error("Error fetching profile:", error);
 				if (error.response && error.response.status === 404) {
-					setProfileError("Profile not found. It may have been moved or deleted.");
+					setProfileError(
+						"Profile not found. It may have been moved or deleted."
+					);
 				} else {
-					setProfileError(error.message || "Could not load profile. Please try again later.");
+					setProfileError(
+						error.message || "Could not load profile. Please try again later."
+					);
 				}
 			} finally {
 				setIsLoading(false);
@@ -78,20 +82,34 @@ export default function ProfileLayout({ userId }) {
 	useEffect(() => {
 		if (!user || !profileData) return;
 
+		let isMounted = true; // Cleanup flag
+
 		const loadUserPosts = async () => {
 			try {
 				const fetchedPosts = await fetchUserPosts(
 					profileData._id,
 					showExpiredPosts && isOwnProfile
 				);
-				setUserPosts(fetchedPosts || []);
-				profilePostIds.current = new Set(fetchedPosts.map((post) => post._id));
+
+				if (isMounted) {
+					// Only update if still mounted
+					setUserPosts(fetchedPosts || []);
+					profilePostIds.current = new Set(
+						fetchedPosts.map((post) => post._id)
+					);
+				}
 			} catch (error) {
-				console.error("Error fetching posts:", error);
+				if (isMounted) {
+					console.error("Error fetching posts:", error);
+				}
 			}
 		};
 
 		loadUserPosts();
+
+		return () => {
+			isMounted = false; // Cleanup
+		};
 	}, [user, profileData, showExpiredPosts, isOwnProfile, fetchUserPosts]);
 
 	useEffect(() => {
@@ -185,7 +203,7 @@ export default function ProfileLayout({ userId }) {
 	}
 
 	if (!user || !profileData) {
-		if(!user) navigate("/login");
+		if (!user) navigate("/login");
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gray-950 p-4">
 				<ErrorMessage message="Profile data could not be loaded or user not authenticated." />

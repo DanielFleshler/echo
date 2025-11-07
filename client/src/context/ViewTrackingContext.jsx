@@ -3,9 +3,9 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
-	useMemo,
 } from "react";
 import PostService from "../services/post.service";
 
@@ -17,24 +17,31 @@ export const ViewTrackingProvider = ({ children }) => {
 	const [viewCounts, setViewCounts] = useState({});
 	const initializedPosts = useRef(new Set());
 	const timerRef = useRef(null);
+	const processBatchRef = useRef(null);  // Ref to store processBatch function
 	const batchSizeThreshold = 5; // Process when we reach this many views
 
 	// Track a post view
-	const trackView = useCallback((postId) => {
-		if (!postId) return;
+	const trackView = useCallback(
+		(postId) => {
+			if (!postId) return;
 
-		// Add the post ID to the pending views set
-		setPendingViews((prevViews) => {
-			const newViews = new Set(prevViews);
-			newViews.add(postId);
-			return newViews;
-		});
+			// Add the post ID to the pending views set
+			setPendingViews((prevViews) => {
+				const newViews = new Set(prevViews);
+				newViews.add(postId);
 
-		// Process immediately if we've reached the threshold
-		if (pendingViews.size >= batchSizeThreshold) {
-			processBatch();
-		}
-	}, [pendingViews]);
+				// Check size AFTER update using the new Set
+				if (newViews.size >= batchSizeThreshold) {
+					// Schedule batch processing after state update completes
+					// Use ref to avoid circular dependency
+					setTimeout(() => processBatchRef.current?.(), 0);
+				}
+
+				return newViews;
+			});
+		},
+		[batchSizeThreshold]  // Remove processBatch from dependencies
+	);
 
 	// Get the view count for a specific post
 	const getViewCount = useCallback(
@@ -62,16 +69,23 @@ export const ViewTrackingProvider = ({ children }) => {
 
 			// If batchIncrementViews was successful, 'result' contains the success data.
 			// Assuming 'result' has a 'status' field and 'data.updatedCounts' upon success from the service structure.
-			if (result.status === "success" && result.data && result.data.updatedCounts) {
+			if (
+				result.status === "success" &&
+				result.data &&
+				result.data.updatedCounts
+			) {
 				setPendingViews(new Set());
 				setViewCounts((prev) => ({
 					...prev,
-					...result.data.updatedCounts
+					...result.data.updatedCounts,
 				}));
-			} else if (result.status === "success") { // Successful but structure might vary (e.g., no updatedCounts)
-				 console.warn("ViewTrackingContext: Batch increment success but no updatedCounts, falling back to local increment.");
-				 setPendingViews(new Set());
-				 setViewCounts((prev) => {
+			} else if (result.status === "success") {
+				// Successful but structure might vary (e.g., no updatedCounts)
+				console.warn(
+					"ViewTrackingContext: Batch increment success but no updatedCounts, falling back to local increment."
+				);
+				setPendingViews(new Set());
+				setViewCounts((prev) => {
 					const updated = { ...prev };
 					postIds.forEach((id) => {
 						updated[id] = (updated[id] || 0) + 1;
@@ -80,7 +94,10 @@ export const ViewTrackingProvider = ({ children }) => {
 				});
 			} else {
 				// This case should ideally not be hit if service throws errors or returns a clear success structure.
-				console.warn("ViewTrackingContext: Unexpected result structure from successful batchIncrementViews:", result);	
+				console.warn(
+					"ViewTrackingContext: Unexpected result structure from successful batchIncrementViews:",
+					result
+				);
 			}
 		} catch (error) {
 			console.warn(
@@ -92,6 +109,11 @@ export const ViewTrackingProvider = ({ children }) => {
 			setIsProcessing(false);
 		}
 	}, [pendingViews, isProcessing]);
+
+	// Keep the ref updated with the latest processBatch function
+	useEffect(() => {
+		processBatchRef.current = processBatch;
+	}, [processBatch]);
 
 	// Process pending views in batch with a timer
 	useEffect(() => {
@@ -135,12 +157,15 @@ export const ViewTrackingProvider = ({ children }) => {
 	}, []);
 
 	// Context value - wrap in useMemo to avoid unnecessary re-renders
-	const value = useMemo(() => ({
-		trackView,
-		getViewCount,
-		initializeViewCount,
-		processBatchNow: processBatch // Expose the ability to force processing
-	}), [trackView, getViewCount, initializeViewCount, processBatch]);
+	const value = useMemo(
+		() => ({
+			trackView,
+			getViewCount,
+			initializeViewCount,
+			processBatchNow: processBatch, // Expose the ability to force processing
+		}),
+		[trackView, getViewCount, initializeViewCount, processBatch]
+	);
 
 	// Process any remaining views when unmounting
 	useEffect(() => {

@@ -62,13 +62,14 @@ export default function PostItem({
 
 	useEffect(() => {
 		// Only track views once and only for non-expired posts
-		if (!hasTrackedView && !post.expired) {
+		// Don't track views on own posts
+		if (!hasTrackedView && !post.expired && !isOwnPost) {
 			trackView(post._id);
 			setHasTrackedView(true);
 		}
 
 		// No cleanup needed - view tracking is batched at context level
-	}, [post._id, post.expired, hasTrackedView, trackView]);
+	}, [post._id, post.expired, hasTrackedView, trackView, isOwnPost]);
 
 	const viewCount = getViewCount(post._id) || post.views || 0;
 
