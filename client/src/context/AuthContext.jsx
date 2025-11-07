@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
 				navigate(`/verify-email/${err.userId}`);
 				throw err;
 			}
-			
+
 			setContextError(err.message || "Login failed");
 			throw err;
 		} finally {
@@ -50,11 +50,11 @@ export function AuthProvider({ children }) {
 			setLoading(true);
 			setContextError(null);
 			const response = await authService.signup(userData);
-			
-			if (response.status === "success" && response.userId) {
+
+			if (response.userId) {
 				navigate(`/verify-email/${response.userId}`);
 			}
-			
+
 			return response;
 		} catch (err) {
 			setContextError(err.message || "Signup failed");
@@ -63,19 +63,19 @@ export function AuthProvider({ children }) {
 			setLoading(false);
 		}
 	};
-	
+
 	// Verify OTP function
 	const verifyOTP = async (userId, otp) => {
 		try {
 			setLoading(true);
 			setContextError(null);
 			const response = await authService.verifyOTP(userId, otp);
-			
+
 			if (response.status === "success") {
 				setUser(response.data.user);
 				navigate("/");
 			}
-			
+
 			return response;
 		} catch (err) {
 			setContextError(err.message || "OTP Verification failed");
@@ -84,7 +84,7 @@ export function AuthProvider({ children }) {
 			setLoading(false);
 		}
 	};
-	
+
 	// Resend OTP function
 	const resendOTP = async (userId) => {
 		try {
