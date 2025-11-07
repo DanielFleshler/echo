@@ -7,19 +7,39 @@ const resetPasswordMessage = require("../utils/email/templates/passwordReset");
 const otpEmailTemplate = require("../utils/email/templates/otpEmail");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 
-const sendToken = (user, statusCode, res) => {
+const sendToken = async (user, statusCode, res) => {
 	const token = user.generateAuthToken();
+	const refreshToken = user.generateRefreshToken();
+
+	// Save refresh token to database
+	await user.save({ validateBeforeSave: false });
+
 	const cookieOptions = {
 		expires: new Date(
 			Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
 		),
 		httpOnly: true,
 	};
+
+	const refreshCookieOptions = {
+		expires: new Date(
+			Date.now() +
+				(process.env.REFRESH_TOKEN_EXPIRES_IN || 7) * 24 * 60 * 60 * 1000
+		),
+		httpOnly: true,
+		path: "/api/v1/users/refresh-token", // Only send refresh token to refresh endpoint
+	};
+
 	res.cookie("jwt", token, cookieOptions);
+	res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+
 	user.password = undefined;
+	user.refreshToken = undefined;
+	user.refreshTokenExpiry = undefined;
 
 	return sendSuccess(res, statusCode, "Authentication successful", {
 		token,
+		refreshToken,
 		data: { user },
 	});
 };
@@ -324,5 +344,74 @@ exports.isLoggedIn = async (req, res, next) => {
 		return next();
 	} catch (err) {
 		return next();
+	}
+};
+
+exports.refreshToken = async (req, res) => {
+	try {
+		// Get refresh token from cookie or body
+		const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+		if (!refreshToken) {
+			return sendError(res, 401, "Refresh token not provided");
+		}
+
+		// Hash the provided refresh token to compare with stored hash
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(refreshToken)
+			.digest("hex");
+
+		// Find user with matching refresh token that hasn't expired
+		const user = await User.findOne({
+			refreshToken: hashedToken,
+			refreshTokenExpiry: { $gt: Date.now() },
+		}).select("+refreshToken +refreshTokenExpiry");
+
+		if (!user) {
+			return sendError(res, 401, "Invalid or expired refresh token");
+		}
+
+		// Generate new tokens
+		const newAccessToken = user.generateAuthToken();
+		const newRefreshToken = user.generateRefreshToken();
+
+		// Save new refresh token to database
+		await user.save({ validateBeforeSave: false });
+
+		// Set new cookies
+		const cookieOptions = {
+			expires: new Date(
+				Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+			),
+			httpOnly: true,
+		};
+
+		const refreshCookieOptions = {
+			expires: new Date(
+				Date.now() +
+					(process.env.REFRESH_TOKEN_EXPIRES_IN || 7) * 24 * 60 * 60 * 1000
+			),
+			httpOnly: true,
+			path: "/api/v1/users/refresh-token",
+		};
+
+		res.cookie("jwt", newAccessToken, cookieOptions);
+		res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
+
+		// Remove sensitive fields
+		user.password = undefined;
+		user.refreshToken = undefined;
+		user.refreshTokenExpiry = undefined;
+
+		return sendSuccess(res, 200, "Token refreshed successfully", {
+			token: newAccessToken,
+			refreshToken: newRefreshToken,
+			data: { user },
+		});
+	} catch (error) {
+		console.error("❌ Refresh token error:", error);
+		console.error("Error stack:", error.stack);
+		return sendError(res, 500, "An error occurred during token refresh");
 	}
 };

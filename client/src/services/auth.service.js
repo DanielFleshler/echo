@@ -17,19 +17,22 @@ const AuthService = {
 	login: async (email, password) => {
 		try {
 			const response = await api.post(`/users/login`, { email, password });
-			
+
 			if (response.data.token) {
 				localStorage.setItem("token", response.data.token);
 				localStorage.setItem("user", JSON.stringify(response.data.data.user));
+			}
+			if (response.data.refreshToken) {
+				localStorage.setItem("refreshToken", response.data.refreshToken);
 			}
 			return response.data;
 		} catch (error) {
 			const errorMessage =
 				error.response?.data?.message ||
 				"Login failed. Please check your credentials.";
-			
+
 			console.error("Login error:", error);
-			
+
 			const loginError = new Error(errorMessage);
 			if (error.response?.data?.userId) {
 				loginError.isVerificationError = true;
@@ -38,16 +41,19 @@ const AuthService = {
 			throw loginError;
 		}
 	},
-	
+
 	verifyOTP: async (userId, otp) => {
 		try {
 			const response = await api.post(`/users/verify-otp/${userId}`, { otp });
-			
+
 			if (response.data.token) {
 				localStorage.setItem("token", response.data.token);
 				localStorage.setItem("user", JSON.stringify(response.data.data.user));
 			}
-			
+			if (response.data.refreshToken) {
+				localStorage.setItem("refreshToken", response.data.refreshToken);
+			}
+
 			return response.data;
 		} catch (error) {
 			const errorMessage =
@@ -57,7 +63,7 @@ const AuthService = {
 			throw new Error(errorMessage);
 		}
 	},
-	
+
 	resendOTP: async (userId) => {
 		try {
 			const response = await api.post(`/users/resend-otp/${userId}`);
@@ -73,6 +79,7 @@ const AuthService = {
 
 	logout: async () => {
 		localStorage.removeItem("token");
+		localStorage.removeItem("refreshToken");
 		localStorage.removeItem("user");
 		try {
 			await api.get(`/users/logout`);
@@ -81,10 +88,10 @@ const AuthService = {
 			console.error("Logout API error:", error);
 			const logoutError = new Error(
 				error.response?.data?.message ||
-				"Server logout may have failed. You have been logged out locally."
+					"Server logout may have failed. You have been logged out locally."
 			);
 			logoutError.isLogoutError = true;
-			throw logoutError; 
+			throw logoutError;
 		}
 	},
 
@@ -110,6 +117,9 @@ const AuthService = {
 			if (response.data.token) {
 				localStorage.setItem("token", response.data.token);
 				localStorage.setItem("user", JSON.stringify(response.data.data.user));
+			}
+			if (response.data.refreshToken) {
+				localStorage.setItem("refreshToken", response.data.refreshToken);
 			}
 			return response.data;
 		} catch (error) {

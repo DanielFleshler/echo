@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 
 const userRouter = require("./routes/userRoutes");
 const postRouter = require("./routes/postRoutes");
@@ -22,6 +23,7 @@ app.use(
 	})
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
