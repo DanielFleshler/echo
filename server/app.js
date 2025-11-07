@@ -7,27 +7,24 @@ const dotenv = require("dotenv");
 
 const userRouter = require("./routes/userRoutes");
 const postRouter = require("./routes/postRoutes");
+const followerRouter = require("./routes/followerRoutes");
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(morgan("dev")); // Logging middleware
-app.use(helmet()); // Security middleware
+app.use(morgan("dev"));
+app.use(helmet());
 app.use(
 	cors({
 		origin: "http://localhost:5173",
 		credentials: true,
 	})
-); // Enable CORS
+);
 
-// Body parser middleware
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Simple test route
 app.get("/", (req, res) => {
 	res.status(200).json({
 		status: "success",
@@ -37,5 +34,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
+app.use("/api/v1/followers", followerRouter);
 
 module.exports = app;
