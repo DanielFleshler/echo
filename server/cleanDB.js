@@ -49,7 +49,7 @@ const createAdminUser = async () => {
 		console.log("Admin user created successfully!");
 		console.log(`Admin username: ${adminUser.username}`);
 		console.log(`Admin email: ${adminUser.email}`);
-		console.log(`Admin password: adminPassword123`);
+		console.log(`Admin password: ${adminUser.password}`);
 	} catch (err) {
 		console.error("Error creating admin user:", err);
 		process.exit(1);
