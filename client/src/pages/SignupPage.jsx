@@ -67,18 +67,14 @@ export default function SignupPage() {
 	};
 
 	const handleSignupSubmit = async (values) => {
-		try {
-			const userData = {
-				username: values.username.toLowerCase(),
-				email: values.email,
-				password: values.password,
-				passwordConfirm: values.confirmPassword,
-				fullName: `${values.firstName} ${values.lastName}`,
-			};
-			await signup(userData);
-		} catch (err) {
-			throw err;
-		}
+		const userData = {
+			username: values.username.toLowerCase(),
+			email: values.email,
+			password: values.password,
+			passwordConfirm: values.confirmPassword,
+			fullName: `${values.firstName} ${values.lastName}`,
+		};
+		await signup(userData);
 	};
 
 	const form = useForm({
