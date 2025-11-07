@@ -241,7 +241,7 @@ export const PostProvider = ({ children }) => {
 				let updatedPost = {};
 				if (response.status === "success" && response.data) {
 					updatedPost = response.data.post;
-					
+
 					// Debug the media object to ensure it's correctly formed
 					console.log("Updated post media:", updatedPost.media);
 				}
@@ -477,11 +477,11 @@ export const PostProvider = ({ children }) => {
 	}, []);
 
 	useEffect(() => {
-		if (user && (initialLoad || posts.length === 0)) {
+		if (user && initialLoad) {
 			fetchPosts(1, 15);
 			fetchTrendingPosts();
 		}
-	}, [user?._id, initialLoad, fetchPosts, fetchTrendingPosts, posts.length, showError]);
+	}, [user?._id, initialLoad, fetchPosts, fetchTrendingPosts, showError]);
 
 	const contextValue = useMemo(
 		() => ({
