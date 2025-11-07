@@ -1,39 +1,44 @@
 import { ArrowLeft, Mail, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { useForm } from "../hooks/useForm";
-import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 export default function ForgotPasswordPage() {
 	const { forgotPassword, loading: authLoading } = useAuth();
 	const { showSuccess, showError } = useToast();
-	const [email, setEmail] = useState("");
-	const [formError, setFormError] = useState("");
 	const [submitted, setSubmitted] = useState(false);
+	const [submittedEmail, setSubmittedEmail] = useState("");
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setFormError("");
-
-		if (!email) {
-			setFormError("Please enter your email address");
-			showError("Please enter your email address");
-			return;
-		}
-
-		try {
-			await forgotPassword(email);
-			showSuccess("Reset link sent! Check your email for instructions.");
-			setSubmitted(true);
-		} catch (err) {
-			const errorMessage =
-				err.message || "Failed to send reset email. Please try again.";
-			setFormError(errorMessage);
-			showError(errorMessage);
-		}
-	};
+	const form = useForm({
+		initialValues: { email: "" },
+		validate: (values) => {
+			const errors = {};
+			if (!values.email) {
+				errors.email = "Email is required";
+			} else if (
+				!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+			) {
+				errors.email = "Invalid email address";
+			}
+			return errors;
+		},
+		onSubmit: async (values) => {
+			try {
+				await forgotPassword(values.email);
+				showSuccess("Reset link sent! Check your email for instructions.");
+				setSubmittedEmail(values.email);
+				setSubmitted(true);
+			} catch (err) {
+				const errorMessage =
+					err.message || "Failed to send reset email. Please try again.";
+				showError(errorMessage);
+				throw err;
+			}
+		},
+	});
 
 	if (authLoading) {
 		return (
@@ -62,9 +67,9 @@ export default function ForgotPasswordPage() {
 						</p>
 					</div>
 
-					{formError && (
+					{form.submitError && (
 						<div className="rounded-md bg-red-900/30 p-3 border border-red-900">
-							<p className="text-sm text-red-400">{formError}</p>
+							<p className="text-sm text-red-400">{form.submitError}</p>
 						</div>
 					)}
 
@@ -73,7 +78,7 @@ export default function ForgotPasswordPage() {
 							<div className="rounded-lg bg-green-900/30 p-4 border border-green-900">
 								<p className="text-sm text-green-400">
 									Reset link sent! Check your email at{" "}
-									<span className="font-semibold">{email}</span> for
+									<span className="font-semibold">{submittedEmail}</span> for
 									instructions to reset your password.
 								</p>
 							</div>
@@ -85,33 +90,41 @@ export default function ForgotPasswordPage() {
 							</Link>
 						</div>
 					) : (
-						<form onSubmit={handleSubmit} className="space-y-4">
+						<form onSubmit={form.handleSubmit} className="space-y-4">
 							<div className="space-y-2">
 								<label
 									htmlFor="email"
 									className="block text-sm font-medium text-gray-300"
 								>
-									Email
+									Email address
 								</label>
 								<div className="relative">
 									<input
 										id="email"
+										name="email"
 										placeholder="hello@example.com"
 										type="email"
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
-										className="w-full rounded-md border border-gray-800 bg-gray-900 pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+										value={form.values.email}
+										onChange={form.handleChange}
+										className={`w-full rounded-md border ${
+											form.errors.email ? "border-red-500" : "border-gray-800"
+										} bg-gray-900 pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`}
 									/>
 									<Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
 								</div>
+								{form.errors.email && (
+									<p className="text-xs text-red-400 mt-1">
+										{form.errors.email}
+									</p>
+								)}
 							</div>
 
 							<button
 								type="submit"
-								disabled={authLoading || form.isSubmitting}
-								className="w-full rounded-md bg-gradient-to-r from-purple-600 to-blue-600 py-2.5 text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-70"
+								disabled={form.isSubmitting}
+								className="w-full rounded-md bg-gradient-to-r from-purple-600 to-blue-600 py-2.5 text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								{authLoading || form.isSubmitting ? "Sending..." : "Send Reset Link"}
+								{form.isSubmitting ? "Sending..." : "Send Reset Link"}
 							</button>
 						</form>
 					)}
