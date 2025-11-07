@@ -7,7 +7,6 @@ const api = axios.create({
 	withCredentials: true,
 });
 
-// Add a request interceptor
 api.interceptors.request.use(
 	(config) => {
 		const token = localStorage.getItem("token");
@@ -17,6 +16,22 @@ api.interceptors.request.use(
 		return config;
 	},
 	(error) => {
+		return Promise.reject(error);
+	}
+);
+
+api.interceptors.response.use(
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config;
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true;
+			localStorage.removeItem("token");
+			localStorage.removeItem("user");
+			window.location.href = "/login?session=expired";
+			return Promise.reject(error);
+		}
+
 		return Promise.reject(error);
 	}
 );
