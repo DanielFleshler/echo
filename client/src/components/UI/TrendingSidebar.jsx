@@ -30,11 +30,17 @@ export default function TrendingSidebar({
 							>
 								<div className="flex items-center gap-2 mb-2">
 									<ProfileAvatar user={post.user} size="xs" />
-									<Link to={`/profile/${post.user._id}`}>
-										<span className="text-xs font-medium text-white hover:text-purple-400 transition-colors duration-200">
-											{post.user.fullName}
+									{post.user ? (
+										<Link to={`/profile/${post.user._id}`}>
+											<span className="text-xs font-medium text-white hover:text-purple-400 transition-colors duration-200">
+												{post.user.fullName}
+											</span>
+										</Link>
+									) : (
+										<span className="text-xs font-medium text-gray-400">
+											Unknown User
 										</span>
-									</Link>
+									)}
 								</div>
 
 								<p className="text-xs text-gray-200 mb-3 line-clamp-2">

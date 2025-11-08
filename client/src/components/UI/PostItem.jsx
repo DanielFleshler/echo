@@ -35,6 +35,7 @@ export default function PostItem({
 	const [isEditing, setIsEditing] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showAllMedia, setShowAllMedia] = useState(false);
+	const [videoModalUrl, setVideoModalUrl] = useState(null);
 
 	const { showSuccess, showError, showInfo } = useToast();
 	const { trackView, getViewCount, initializeViewCount } = useViewTracking();
@@ -42,7 +43,7 @@ export default function PostItem({
 		usePost();
 
 	const initializedRef = useRef(false);
-	const isOwnPost = user._id === post.user._id;
+	const isOwnPost = user._id === post.user?._id;
 	const commentCount = post.comments ? post.comments.length : 0;
 	const isMounted = useRef(true);
 
@@ -71,6 +72,20 @@ export default function PostItem({
 		// No cleanup needed - view tracking is batched at context level
 	}, [post._id, post.expired, hasTrackedView, trackView, isOwnPost]);
 
+	// Handle Escape key to close video modal
+	useEffect(() => {
+		const handleEscape = (e) => {
+			if (e.key === "Escape" && videoModalUrl) {
+				setVideoModalUrl(null);
+			}
+		};
+
+		if (videoModalUrl) {
+			document.addEventListener("keydown", handleEscape);
+			return () => document.removeEventListener("keydown", handleEscape);
+		}
+	}, [videoModalUrl]);
+
 	const viewCount = getViewCount(post._id) || post.views || 0;
 
 	const handleDelete = async () => {
@@ -85,7 +100,7 @@ export default function PostItem({
 			} catch (error) {
 				console.error("Error deleting post:", error);
 				if (isMounted.current) {
-					showError("Failed to delete post");
+					showError(error.message || "Failed to delete post");
 				}
 			} finally {
 				if (isMounted.current) {
@@ -106,7 +121,7 @@ export default function PostItem({
 		} catch (error) {
 			console.error("Error renewing post:", error);
 			if (isMounted.current) {
-				showError("Failed to renew post");
+				showError(error.message || "Failed to renew post");
 			}
 		} finally {
 			if (isMounted.current) {
@@ -135,7 +150,7 @@ export default function PostItem({
 		} catch (error) {
 			console.error("Error updating post:", error);
 			if (isMounted.current) {
-				showError("Failed to update post");
+				showError(error.message || "Failed to update post");
 			}
 		} finally {
 			if (isMounted.current) {
@@ -307,22 +322,10 @@ export default function PostItem({
 														Your browser does not support the video tag.
 													</video>
 													<div className="absolute inset-0 flex items-center justify-center">
-														<button 
+														<button
 															onClick={(e) => {
 																e.stopPropagation();
-																// Create a fullscreen modal with the video
-																const modal = document.createElement('div');
-																modal.className = 'fixed inset-0 bg-black/90 z-50 flex items-center justify-center';
-																modal.onclick = () => modal.remove();
-																
-																const videoElement = document.createElement('video');
-																videoElement.src = mediaItem.url;
-																videoElement.className = 'max-h-screen max-w-screen-lg';
-																videoElement.controls = true;
-																videoElement.autoplay = true;
-																
-																modal.appendChild(videoElement);
-																document.body.appendChild(modal);
+																setVideoModalUrl(mediaItem.url);
 															}}
 															className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center text-white"
 														>
@@ -416,6 +419,24 @@ export default function PostItem({
 						onDeleteComment={deleteComment}
 						currentUser={user}
 					/>
+				</div>
+			)}
+
+			{/* Video Modal */}
+			{videoModalUrl && (
+				<div
+					className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+					onClick={() => setVideoModalUrl(null)}
+				>
+					<video
+						src={videoModalUrl}
+						className="max-h-screen max-w-screen-lg"
+						controls
+						autoPlay
+						onClick={(e) => e.stopPropagation()}
+					>
+						Your browser does not support the video tag.
+					</video>
 				</div>
 			)}
 		</Card>

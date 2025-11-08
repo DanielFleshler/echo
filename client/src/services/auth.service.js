@@ -143,6 +143,18 @@ const AuthService = {
 		}
 	},
 
+	updateLocalUser: (userData) => {
+		try {
+			const stored = JSON.parse(localStorage.getItem("user") || "{}");
+			const updatedUser = { ...stored, ...userData };
+			localStorage.setItem("user", JSON.stringify(updatedUser));
+			return { success: true, user: updatedUser };
+		} catch (error) {
+			console.error("Failed to update local user:", error);
+			return { success: false, error: error.message };
+		}
+	},
+
 	isAuthenticated: () => {
 		return !!localStorage.getItem("token");
 	},
