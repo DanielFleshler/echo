@@ -30,7 +30,6 @@ export default function PostItem({
 	const { user } = useAuth();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [isRenewing, setIsRenewing] = useState(false);
-	const [hasTrackedView, setHasTrackedView] = useState(false);
 	const [showComments, setShowComments] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,6 +42,7 @@ export default function PostItem({
 		usePost();
 
 	const initializedRef = useRef(false);
+	const viewTrackedRef = useRef(false);  // Use ref instead of state to prevent double-tracking
 	const isOwnPost = user._id === post.user?._id;
 	const commentCount = post.comments ? post.comments.length : 0;
 	const isMounted = useRef(true);
@@ -59,18 +59,23 @@ export default function PostItem({
 			initializedRef.current = true;
 			initializeViewCount(post._id, post.views || 0);
 		}
-	}, [post._id, post.views, initializeViewCount]);
+		// initializeViewCount is a stable callback, don't include it in deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [post._id, post.views]);
 
 	useEffect(() => {
 		// Only track views once and only for non-expired posts
 		// Don't track views on own posts
-		if (!hasTrackedView && !post.expired && !isOwnPost) {
+		// Use ref to prevent double-tracking in React.StrictMode
+		if (!viewTrackedRef.current && !post.expired && !isOwnPost) {
+			viewTrackedRef.current = true;  // Set immediately to prevent double-tracking
 			trackView(post._id);
-			setHasTrackedView(true);
 		}
 
-		// No cleanup needed - view tracking is batched at context level
-	}, [post._id, post.expired, hasTrackedView, trackView, isOwnPost]);
+		// trackView is a stable callback, don't include it in deps
+		// The viewTrackedRef guard prevents multiple calls
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [post._id, post.expired, isOwnPost]);
 
 	// Handle Escape key to close video modal
 	useEffect(() => {
