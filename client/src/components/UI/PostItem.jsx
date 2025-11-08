@@ -39,7 +39,7 @@ export default function PostItem({
 
 	const { showSuccess, showError, showInfo } = useToast();
 	const { trackView, getViewCount, initializeViewCount } = useViewTracking();
-	const { updatePost, deletePost, renewPost, addComment, deleteComment } =
+	const { updatePost, deletePost, renewPost, addComment, updateComment, deleteComment } =
 		usePost();
 
 	const initializedRef = useRef(false);
@@ -409,6 +409,7 @@ export default function PostItem({
 					<CommentSection
 						post={post}
 						onAddComment={addComment}
+						onEditComment={updateComment}
 						onDeleteComment={deleteComment}
 						currentUser={user}
 					/>

@@ -1,12 +1,17 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit2, Save, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import ProfileAvatar from "./ProfileAvatar";
 
-export default function ReplyItem({ reply, postId, commentId, onDelete }) {
+export default function ReplyItem({ reply, postId, commentId, onDelete, onEdit }) {
 	const { user } = useAuth();
+	const { showSuccess, showError } = useToast();
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [editedContent, setEditedContent] = useState(reply.content);
+	const [isUpdating, setIsUpdating] = useState(false);
 	const isAuthor = user && reply.user && user._id === reply.user._id;
 	const formatDate = (dateString) => {
 		const date = new Date(dateString);
@@ -22,6 +27,34 @@ export default function ReplyItem({ reply, postId, commentId, onDelete }) {
 		if (diffDays < 7) return `${diffDays}d ago`;
 
 		return date.toLocaleDateString();
+	};
+
+	const handleEdit = () => {
+		setIsEditing(true);
+		setEditedContent(reply.content);
+	};
+
+	const handleCancelEdit = () => {
+		setIsEditing(false);
+		setEditedContent(reply.content);
+	};
+
+	const handleSaveEdit = async () => {
+		if (!editedContent.trim() || editedContent.trim() === reply.content) {
+			handleCancelEdit();
+			return;
+		}
+
+		setIsUpdating(true);
+		try {
+			await onEdit(postId, commentId, reply._id, editedContent.trim());
+			setIsEditing(false);
+			showSuccess("Reply updated successfully");
+		} catch (error) {
+			showError(error.message || "Failed to update reply");
+		} finally {
+			setIsUpdating(false);
+		}
 	};
 
 	const handleDelete = async () => {
@@ -93,21 +126,61 @@ export default function ReplyItem({ reply, postId, commentId, onDelete }) {
 						</span>
 					</div>
 
-					{isAuthor && (
-						<button
-							onClick={handleDelete}
-							disabled={isDeleting}
-							className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-red-400 transition-colors duration-200"
-							aria-label="Delete reply"
-						>
-							<Trash2 className="h-3 w-3" />
-						</button>
+					{isAuthor && !isEditing && (
+						<div className="flex gap-1">
+							<button
+								onClick={handleEdit}
+								disabled={isDeleting}
+								className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-blue-400 transition-colors duration-200"
+								aria-label="Edit reply"
+							>
+								<Edit2 className="h-3 w-3" />
+							</button>
+							<button
+								onClick={handleDelete}
+								disabled={isDeleting}
+								className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-red-400 transition-colors duration-200"
+								aria-label="Delete reply"
+							>
+								<Trash2 className="h-3 w-3" />
+							</button>
+						</div>
 					)}
 				</div>
 
-				<p className="mt-1 text-xs text-gray-300 break-words">
-					{reply.content}
-				</p>
+				{isEditing ? (
+					<div className="mt-2">
+						<textarea
+							value={editedContent}
+							onChange={(e) => setEditedContent(e.target.value)}
+							className="w-full rounded-lg border border-gray-800/80 bg-gray-900/50 px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors duration-200 resize-none"
+							rows={2}
+							disabled={isUpdating}
+						/>
+						<div className="flex gap-2 mt-2">
+							<button
+								onClick={handleSaveEdit}
+								disabled={isUpdating || !editedContent.trim()}
+								className="flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200"
+							>
+								<Save className="h-3 w-3" />
+								<span>Save</span>
+							</button>
+							<button
+								onClick={handleCancelEdit}
+								disabled={isUpdating}
+								className="flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50 transition-all duration-200"
+							>
+								<X className="h-3 w-3" />
+								<span>Cancel</span>
+							</button>
+						</div>
+					</div>
+				) : (
+					<p className="mt-1 text-xs text-gray-300 break-words">
+						{reply.content}
+					</p>
+				)}
 			</div>
 		</div>
 	);

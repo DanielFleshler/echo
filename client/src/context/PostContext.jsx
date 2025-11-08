@@ -358,6 +358,42 @@ export const PostProvider = ({ children }) => {
 		[setPosts, setProfilePosts, showError]
 	);
 
+	const updateComment = useCallback(
+		async (postId, commentId, commentContent) => {
+			try {
+				const response = await PostService.updateComment(
+					postId,
+					commentId,
+					commentContent
+				);
+				let updatedPost = {};
+				if (response.status === "success" && response.data) {
+					updatedPost = response.data.post;
+				}
+				if (updatedPost) {
+					setPosts((prevPosts) =>
+						prevPosts.map((post) =>
+							post._id === postId ? { ...post, ...updatedPost } : post
+						)
+					);
+					setProfilePosts((prevProfilePosts) =>
+						prevProfilePosts.map((post) =>
+							post._id === postId ? { ...post, ...updatedPost } : post
+						)
+					);
+					return updatedPost;
+				} else {
+					throw new Error("Invalid response format");
+				}
+			} catch (error) {
+				console.error("Error updating comment:", error);
+				showError(error.message || "Failed to update comment");
+				throw error;
+			}
+		},
+		[setPosts, setProfilePosts, showError]
+	);
+
 	const deleteComment = useCallback(
 		async (postId, commentId) => {
 			try {
@@ -434,6 +470,43 @@ export const PostProvider = ({ children }) => {
 		[setPosts, setProfilePosts, showError]
 	);
 
+	const updateCommentReply = useCallback(
+		async (postId, commentId, replyId, replyContent) => {
+			try {
+				const response = await PostService.updateCommentReply(
+					postId,
+					commentId,
+					replyId,
+					replyContent
+				);
+				let updatedPost = {};
+				if (response.status === "success" && response.data) {
+					updatedPost = response.data.post;
+				}
+				if (updatedPost) {
+					setPosts((prevPosts) =>
+						prevPosts.map((post) =>
+							post._id === postId ? { ...post, ...updatedPost } : post
+						)
+					);
+					setProfilePosts((prevProfilePosts) =>
+						prevProfilePosts.map((post) =>
+							post._id === postId ? { ...post, ...updatedPost } : post
+						)
+					);
+					return updatedPost;
+				} else {
+					throw new Error("Invalid response format");
+				}
+			} catch (error) {
+				console.error("Error updating reply:", error);
+				showError(error.message || "Failed to update reply");
+				throw error;
+			}
+		},
+		[setPosts, setProfilePosts, showError]
+	);
+
 	const deleteCommentReply = useCallback(
 		async (postId, commentId, replyId) => {
 			try {
@@ -495,11 +568,13 @@ export const PostProvider = ({ children }) => {
 			deletePost,
 			renewPost,
 			addComment,
+			updateComment,
 			deleteComment,
 			getHoursLeft,
 			loadMorePosts,
 			refreshPosts,
 			addCommentReply,
+			updateCommentReply,
 			deleteCommentReply,
 		}),
 		[
@@ -518,11 +593,13 @@ export const PostProvider = ({ children }) => {
 			deletePost,
 			renewPost,
 			addComment,
+			updateComment,
 			deleteComment,
 			getHoursLeft,
 			loadMorePosts,
 			refreshPosts,
 			addCommentReply,
+			updateCommentReply,
 			deleteCommentReply,
 		]
 	);

@@ -1,4 +1,4 @@
-import { ReplyIcon, Trash2 } from "lucide-react";
+import { ReplyIcon, Trash2, Edit2, Save, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -7,11 +7,14 @@ import { useToast } from "../../context/ToastContext";
 import ProfileAvatar from "./ProfileAvatar";
 import ReplyItem from "./ReplyItem";
 
-export default function CommentItem({ comment, postId, onDelete }) {
+export default function CommentItem({ comment, postId, onDelete, onEdit }) {
 	const { user } = useAuth();
-	const { addCommentReply, deleteCommentReply } = usePost();
+	const { addCommentReply, updateCommentReply, deleteCommentReply } = usePost();
 	const { showSuccess, showError } = useToast();
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [editedContent, setEditedContent] = useState(comment.content);
+	const [isUpdating, setIsUpdating] = useState(false);
 	const [showReplyForm, setShowReplyForm] = useState(false);
 	const [replyContent, setReplyContent] = useState("");
 	const [isSubmittingReply, setIsSubmittingReply] = useState(false);
@@ -36,6 +39,34 @@ export default function CommentItem({ comment, postId, onDelete }) {
 		if (diffDays < 7) return `${diffDays}d ago`;
 
 		return date.toLocaleDateString();
+	};
+
+	const handleEdit = () => {
+		setIsEditing(true);
+		setEditedContent(comment.content);
+	};
+
+	const handleCancelEdit = () => {
+		setIsEditing(false);
+		setEditedContent(comment.content);
+	};
+
+	const handleSaveEdit = async () => {
+		if (!editedContent.trim() || editedContent.trim() === comment.content) {
+			handleCancelEdit();
+			return;
+		}
+
+		setIsUpdating(true);
+		try {
+			await onEdit(postId, comment._id, editedContent.trim());
+			setIsEditing(false);
+			showSuccess("Comment updated successfully");
+		} catch (error) {
+			showError(error.message || "Failed to update comment");
+		} finally {
+			setIsUpdating(false);
+		}
 	};
 
 	const handleDelete = async () => {
@@ -73,6 +104,15 @@ export default function CommentItem({ comment, postId, onDelete }) {
 			showError(error.message || "Failed to add reply");
 		} finally {
 			setIsSubmittingReply(false);
+		}
+	};
+
+	const handleEditReply = async (postId, commentId, replyId, replyContent) => {
+		try {
+			await updateCommentReply(postId, commentId, replyId, replyContent);
+		} catch (error) {
+			console.error("Error editing reply:", error);
+			throw error;
 		}
 	};
 
@@ -131,21 +171,61 @@ export default function CommentItem({ comment, postId, onDelete }) {
 							</span>
 						</div>
 
-						{isAuthor && (
-							<button
-								onClick={handleDelete}
-								disabled={isDeleting}
-								className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-red-400 transition-colors duration-200"
-								aria-label="Delete comment"
-							>
-								<Trash2 className="h-3.5 w-3.5" />
-							</button>
+						{isAuthor && !isEditing && (
+							<div className="flex gap-1">
+								<button
+									onClick={handleEdit}
+									disabled={isDeleting}
+									className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-blue-400 transition-colors duration-200"
+									aria-label="Edit comment"
+								>
+									<Edit2 className="h-3.5 w-3.5" />
+								</button>
+								<button
+									onClick={handleDelete}
+									disabled={isDeleting}
+									className="rounded-full p-1.5 text-gray-500 hover:bg-gray-800/70 hover:text-red-400 transition-colors duration-200"
+									aria-label="Delete comment"
+								>
+									<Trash2 className="h-3.5 w-3.5" />
+								</button>
+							</div>
 						)}
 					</div>
 
-					<p className="mt-1.5 text-sm text-gray-300 break-words">
-						{comment.content}
-					</p>
+					{isEditing ? (
+						<div className="mt-2">
+							<textarea
+								value={editedContent}
+								onChange={(e) => setEditedContent(e.target.value)}
+								className="w-full rounded-lg border border-gray-800/80 bg-gray-900/50 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors duration-200 resize-none"
+								rows={2}
+								disabled={isUpdating}
+							/>
+							<div className="flex gap-2 mt-2">
+								<button
+									onClick={handleSaveEdit}
+									disabled={isUpdating || !editedContent.trim()}
+									className="flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200"
+								>
+									<Save className="h-3 w-3" />
+									<span>Save</span>
+								</button>
+								<button
+									onClick={handleCancelEdit}
+									disabled={isUpdating}
+									className="flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 disabled:opacity-50 transition-all duration-200"
+								>
+									<X className="h-3 w-3" />
+									<span>Cancel</span>
+								</button>
+							</div>
+						</div>
+					) : (
+						<p className="mt-1.5 text-sm text-gray-300 break-words">
+							{comment.content}
+						</p>
+					)}
 				</div>
 			</div>
 
@@ -212,6 +292,7 @@ export default function CommentItem({ comment, postId, onDelete }) {
 							reply={reply}
 							postId={postId}
 							commentId={comment._id}
+							onEdit={handleEditReply}
 							onDelete={handleDeleteReply}
 						/>
 					))}

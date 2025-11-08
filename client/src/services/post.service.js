@@ -93,6 +93,20 @@ const PostService = {
 		}
 	},
 
+	updateComment: async (postId, commentId, commentContent) => {
+		try {
+			const response = await api.patch(
+				`${POSTS_URL}/${postId}/comments/${commentId}`,
+				{ commentContent }
+			);
+			return response.data;
+		} catch (error) {
+			console.error(`Update comment error for post ${postId}, comment ${commentId}:`, error);
+			const errorMessage = error.response?.data?.message || "Failed to update comment.";
+			throw new Error(errorMessage);
+		}
+	},
+
 	deleteComment: async (postId, commentId) => {
 		try {
 			const response = await api.delete(
@@ -116,6 +130,20 @@ const PostService = {
 		} catch (error) {
 			console.error(`Add reply error for post ${postId}, comment ${commentId}:`, error);
 			const errorMessage = error.response?.data?.message || "Failed to add reply.";
+			throw new Error(errorMessage);
+		}
+	},
+
+	updateCommentReply: async (postId, commentId, replyId, replyContent) => {
+		try {
+			const response = await api.patch(
+				`${POSTS_URL}/${postId}/comments/${commentId}/replies/${replyId}`,
+				{ replyContent }
+			);
+			return response.data;
+		} catch (error) {
+			console.error(`Update reply error for post ${postId}, comment ${commentId}, reply ${replyId}:`, error);
+			const errorMessage = error.response?.data?.message || "Failed to update reply.";
 			throw new Error(errorMessage);
 		}
 	},

@@ -303,6 +303,50 @@ exports.addComment = async (req, res) => {
 	}
 };
 
+exports.updateComment = async (req, res) => {
+	try {
+		const { commentContent } = req.body;
+
+		if (!commentContent || commentContent.trim() === "") {
+			return sendError(res, 400, "Comment content is required");
+		}
+
+		let post = await Post.findById(req.params.id);
+		if (!post) {
+			return sendError(res, 404, "Post not found");
+		}
+
+		const comment = post.comments.find(
+			(c) =>
+				c._id.toString() === req.params.commentId &&
+				c.user.toString() === req.user._id.toString()
+		);
+
+		if (!comment) {
+			return sendError(
+				res,
+				403,
+				"Comment not found or you're not authorized to edit it"
+			);
+		}
+
+		comment.content = commentContent.trim();
+		await post.save();
+
+		post = await populatePostFields(Post.findById(post._id));
+
+		return sendSuccess(res, 200, "Comment updated successfully", {
+			data: {
+				post: enhancePostWithVirtuals(post),
+			},
+		});
+	} catch (error) {
+		return sendError(res, 500, "Error updating comment", {
+			error: process.env.NODE_ENV === "development" ? error.message : undefined,
+		});
+	}
+};
+
 exports.deleteComment = async (req, res) => {
 	try {
 		let post = await Post.findById(req.params.id);
@@ -380,6 +424,57 @@ exports.addCommentReply = async (req, res) => {
 		});
 	} catch (error) {
 		return sendError(res, 500, "Error adding reply");
+	}
+};
+
+exports.updateCommentReply = async (req, res) => {
+	try {
+		const { replyContent } = req.body;
+
+		if (!replyContent || replyContent.trim() === "") {
+			return sendError(res, 400, "Reply content is required");
+		}
+
+		let post = await Post.findById(req.params.id);
+		if (!post) {
+			return sendError(res, 404, "Post not found");
+		}
+
+		const comment = post.comments.find(
+			(c) => c._id.toString() === req.params.commentId
+		);
+		if (!comment) {
+			return sendError(res, 404, "Comment not found");
+		}
+
+		const reply = comment.replies.find(
+			(r) =>
+				r._id.toString() === req.params.replyId &&
+				r.user.toString() === req.user._id.toString()
+		);
+
+		if (!reply) {
+			return sendError(
+				res,
+				403,
+				"Reply not found or you're not authorized to edit it"
+			);
+		}
+
+		reply.content = replyContent.trim();
+		await post.save();
+
+		post = await populatePostFields(Post.findById(post._id));
+
+		return sendSuccess(res, 200, "Reply updated successfully", {
+			data: {
+				post: enhancePostWithVirtuals(post),
+			},
+		});
+	} catch (error) {
+		return sendError(res, 500, "Error updating reply", {
+			error: process.env.NODE_ENV === "development" ? error.message : undefined,
+		});
 	}
 };
 
