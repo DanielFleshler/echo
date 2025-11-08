@@ -1,5 +1,5 @@
 import { Clock, Image, XCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import Card from "./Card";
 import ProfileAvatar from "./ProfileAvatar";
@@ -16,6 +16,8 @@ export default function PostForm({
 	const [content, setContent] = useState(initialContent);
 	const [expirationTime, setExpirationTime] = useState("24");
 	const [mediaItems, setMediaItems] = useState([]);
+
+	const activeUrlsRef = useRef([]);
 
 	useEffect(() => {
 		setContent(initialContent);
@@ -49,13 +51,26 @@ export default function PostForm({
 		return "unknown";
 	};
 
+	// Manage object URLs lifecycle to prevent memory leaks
 	useEffect(() => {
-		const urlsToRevoke = mediaItems
+		// Revoke previous object URLs that are no longer in use
+		const currentUrls = mediaItems
 			.filter((item) => !item.isExisting && item.previewUrl)
 			.map((item) => item.previewUrl);
 
+		// Revoke URLs that are no longer in the current media items
+		activeUrlsRef.current.forEach((url) => {
+			if (!currentUrls.includes(url)) {
+				URL.revokeObjectURL(url);
+			}
+		});
+
+		// Update the ref with current URLs
+		activeUrlsRef.current = currentUrls;
+
+		// Cleanup: revoke all remaining URLs on component unmount
 		return () => {
-			urlsToRevoke.forEach((url) => URL.revokeObjectURL(url));
+			activeUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
 		};
 	}, [mediaItems]);
 
@@ -142,7 +157,7 @@ export default function PostForm({
 			}
 		} catch (error) {
 			showError(error.message || "Failed to create post. Please try again.");
-		} 
+		}
 	};
 
 	// Helper functions for media type checking
@@ -230,7 +245,10 @@ export default function PostForm({
 									);
 								})}
 								{mediaItems.length > 0 && (
-									<p className="w-full mt-1 text-xs text-gray-400">{mediaItems.length} media item(s) selected {mediaItems.length >= 5 && "(Maximum reached)"}</p>
+									<p className="w-full mt-1 text-xs text-gray-400">
+										{mediaItems.length} media item(s) selected{" "}
+										{mediaItems.length >= 5 && "(Maximum reached)"}
+									</p>
 								)}
 							</div>
 						)}
