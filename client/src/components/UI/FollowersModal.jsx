@@ -2,13 +2,13 @@ import { Sparkles, User, UserCheck, UserPlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useFollower } from "../../context/FollowerContext";
 import { useToast } from "../../context/ToastContext";
 import FollowerService from "../../services/follower.service";
-import { useFollower } from "../../context/FollowerContext";
-import ProfileAvatar from "./ProfileAvatar";
-import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 import ErrorMessage from "./ErrorMessage";
+import LoadingSpinner from "./LoadingSpinner";
+import ProfileAvatar from "./ProfileAvatar";
 
 export default function FollowersModal({
 	isOpen,
@@ -41,6 +41,7 @@ export default function FollowersModal({
 			setLoading(true);
 			setUsers([]);
 			setCurrentPage(1);
+			setHasMore(true);
 			setFetchError(null);
 			fetchUsers(1);
 		}
@@ -253,10 +254,12 @@ export default function FollowersModal({
 							)}
 						</div>
 					) : (
-						<EmptyState 
-							message={activeTab === "followers" 
-								? "This user doesn\'t have any followers yet."
-								: "This user isn\'t following anyone yet."}
+						<EmptyState
+							message={
+								activeTab === "followers"
+									? "This user doesn't have any followers yet."
+									: "This user isn't following anyone yet."
+							}
 						/>
 					)}
 				</div>
