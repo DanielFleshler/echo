@@ -1,7 +1,6 @@
 // client/src/components/UI/CommentSection.jsx
 import { Send } from "lucide-react";
 import { useState } from "react";
-import { usePost } from "../../context/PostContext";
 import { useToast } from "../../context/ToastContext";
 import CommentItem from "./CommentItem";
 import ProfileAvatar from "./ProfileAvatar";
@@ -17,7 +16,6 @@ export default function CommentSection({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 	const { showSuccess, showError } = useToast();
-	const postContext = usePost();
 	const comments = post.comments || [];
 
 	const handleAddComment = async (e) => {
@@ -26,8 +24,7 @@ export default function CommentSection({
 
 		setIsSubmitting(true);
 		try {
-			const addCommentFn = onAddComment || postContext.addComment;
-			await addCommentFn(post._id, commentContent.trim());
+			await onAddComment(post._id, commentContent.trim());
 			showSuccess("Comment added successfully");
 			setCommentContent("");
 		} catch (error) {
@@ -40,8 +37,7 @@ export default function CommentSection({
 
 	const handleDeleteComment = async (postId, commentId) => {
 		try {
-			const deleteCommentFn = onDeleteComment || postContext.deleteComment;
-			await deleteCommentFn(postId, commentId);
+			await onDeleteComment(postId, commentId);
 			showSuccess("Comment deleted successfully");
 		} catch (error) {
 			console.error("Error deleting comment:", error);
