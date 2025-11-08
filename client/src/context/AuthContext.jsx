@@ -126,24 +126,17 @@ export function AuthProvider({ children }) {
 
 	// Update user function
 	const updateUser = (userData) => {
-		try {
-			if (user) {
+		if (user) {
+			const result = authService.updateLocalUser(userData);
+			if (result.success) {
 				setUser((prevUser) => ({
 					...prevUser,
 					...userData,
 				}));
-				const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-				localStorage.setItem(
-					"user",
-					JSON.stringify({
-						...storedUser,
-						...userData,
-					})
-				);
+			} else {
+				console.error("AuthContext: Error updating user in localStorage", result.error);
+				showError("Could not save user changes locally.");
 			}
-		} catch (e) {
-			console.error("AuthContext: Error updating user in localStorage", e);
-			showError("Could not save user changes locally.");
 		}
 	};
 
