@@ -103,7 +103,14 @@ export const PostProvider = ({ children }) => {
 						);
 						return [...prevPosts, ...uniqueNewPosts];
 					});
-					setHasMore(pagination.hasMore);
+
+					// Safety check: if fetching page > 1 and got no posts, set hasMore to false
+					if (pageNum > 1 && newPosts.length === 0) {
+						setHasMore(false);
+					} else {
+						setHasMore(pagination.hasMore);
+					}
+
 					setPage(pagination.currentPage);
 
 					if (initialLoad) {
@@ -144,7 +151,14 @@ export const PostProvider = ({ children }) => {
 						return [...prevPosts, ...uniqueNewPosts];
 					});
 				}
-				setHasMore(pagination.hasMore);
+
+				// Safety check: if fetching page > 1 and got no posts, set hasMore to false
+				if (pageNum > 1 && userPosts.length === 0) {
+					setHasMore(false);
+				} else {
+					setHasMore(pagination.hasMore);
+				}
+
 				setPage(pagination.currentPage);
 
 				return userPosts;
@@ -160,7 +174,9 @@ export const PostProvider = ({ children }) => {
 	);
 
 	const loadMorePosts = useCallback(async () => {
-		if (!hasMore || loadingPosts) return;
+		if (!hasMore || loadingPosts) {
+			return;
+		}
 
 		const nextPage = page + 1;
 		return await fetchPosts(nextPage, 15);

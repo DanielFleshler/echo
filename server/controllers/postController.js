@@ -65,17 +65,29 @@ exports.getUserPosts = async (req, res) => {
 		const { includeExpired, page = 1, limit = 15 } = req.query;
 
 		const pagination = getPaginationInfo(page, limit, 0);
-		let query = Post.find({ user: userId });
 
-		if (includeExpired === "true") {
-			query = query.where({ includeExpired: true });
+		// Build base query conditions
+		let queryConditions = { user: userId };
+
+		// Add expiration filter if not including expired posts
+		if (includeExpired !== "true") {
+			queryConditions.expiresAt = { $gt: new Date() };
 		}
 
-		const totalPosts = await Post.countDocuments(query.getQuery());
-		query = query
+		// Count total posts with the same conditions
+		const totalPosts = await Post.countDocuments(queryConditions);
+
+		// Build find query
+		let query = Post.find(queryConditions)
 			.skip(pagination.skip)
 			.limit(pagination.itemsPerPage)
 			.sort({ createdAt: -1 });
+
+		// If including expired, set the option to bypass pre-find middleware
+		if (includeExpired === "true") {
+			query = query.setOptions({ includeExpired: true });
+		}
+
 		const posts = await populatePostFields(query);
 		const enhancedPosts = enhancePostsWithVirtuals(posts);
 
@@ -101,20 +113,33 @@ exports.getAllPosts = async (req, res) => {
 		} = req.query;
 
 		const pagination = getPaginationInfo(page, limit, 0);
-		let query = {};
 
+		// Build query conditions - always filter expired posts for counting
+		// Don't rely on middleware for countDocuments as it doesn't trigger pre-find hooks
+		let queryConditions = {};
 		if (includeExpired !== "true") {
-			query.expiresAt = { $gt: new Date() };
+			queryConditions.expiresAt = { $gt: new Date() };
 		}
 
-		const totalPosts = await Post.countDocuments(query);
-		const posts = await populatePostFields(
-			Post.find(query)
-				.skip(pagination.skip)
-				.limit(pagination.itemsPerPage)
-				.sort(sortBy)
-		);
+		// Count documents with the same conditions
+		const totalPosts = await Post.countDocuments(queryConditions);
+
+		// Build find query - let middleware handle filtering for find operations
+		// Only use manual conditions if we want to include expired
+		let findQuery = Post.find(includeExpired === "true" ? {} : queryConditions)
+			.skip(pagination.skip)
+			.limit(pagination.itemsPerPage)
+			.sort(sortBy);
+
+		// If including expired, explicitly bypass the pre-find middleware
+		if (includeExpired === "true") {
+			findQuery = findQuery.setOptions({ includeExpired: true });
+		}
+
+		const posts = await populatePostFields(findQuery);
 		const enhancedPosts = enhancePostsWithVirtuals(posts);
+
+		console.log(`[getAllPosts] Page ${page}, Limit ${limit}, Returned ${enhancedPosts.length} posts, Total: ${totalPosts}, HasMore: ${pagination.totalPages > page}`);
 
 		return sendSuccess(res, 200, "Posts retrieved successfully", {
 			data: {
@@ -132,7 +157,7 @@ exports.getAllPosts = async (req, res) => {
 exports.getPost = async (req, res) => {
 	try {
 		const post = await populatePostFields(
-			Post.findById(req.params.id).where({ includeExpired: true })
+			Post.findById(req.params.id).setOptions({ includeExpired: true })
 		);
 
 		if (!post) {
@@ -525,8 +550,7 @@ exports.renewPost = async (req, res) => {
 		const post = await Post.findOne({
 			_id: req.params.id,
 			user: req.user._id,
-			includeExpired: true,
-		});
+		}).setOptions({ includeExpired: true });
 
 		if (!post) {
 			return sendError(

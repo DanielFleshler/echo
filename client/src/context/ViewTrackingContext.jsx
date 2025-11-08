@@ -18,6 +18,7 @@ export const ViewTrackingProvider = ({ children }) => {
 	const initializedPosts = useRef(new Set());
 	const timerRef = useRef(null);
 	const processBatchRef = useRef(null);  // Ref to store processBatch function
+	const isProcessingRef = useRef(false);  // Synchronous lock to prevent concurrent batch processing
 	const batchSizeThreshold = 5; // Process when we reach this many views
 
 	// Track a post view
@@ -53,8 +54,12 @@ export const ViewTrackingProvider = ({ children }) => {
 
 	// Process pending views in batch - extracted as a named function to call directly
 	const processBatch = useCallback(async () => {
-		if (pendingViews.size === 0 || isProcessing) return;
+		// Use synchronous ref check to prevent concurrent execution
+		if (pendingViews.size === 0 || isProcessingRef.current) {
+			return;
+		}
 
+		isProcessingRef.current = true;  // Set synchronously BEFORE async state
 		setIsProcessing(true);
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
@@ -104,6 +109,7 @@ export const ViewTrackingProvider = ({ children }) => {
 			);
 			// Pending views are not cleared here, allowing for a retry on the next batch attempt.
 		} finally {
+			isProcessingRef.current = false;  // Reset synchronous lock
 			setIsProcessing(false);
 		}
 	}, [pendingViews, isProcessing]);
@@ -119,7 +125,7 @@ export const ViewTrackingProvider = ({ children }) => {
 		if (pendingViews.size > 0 && !isProcessing && !timerRef.current) {
 			// Create a timer to process batches
 			timerRef.current = setTimeout(() => {
-				processBatch();
+				processBatchRef.current?.();
 				timerRef.current = null;
 			}, 3000);
 		}
@@ -131,7 +137,7 @@ export const ViewTrackingProvider = ({ children }) => {
 				timerRef.current = null;
 			}
 		};
-	}, [pendingViews, isProcessing, processBatch]);
+	}, [pendingViews.size, isProcessing]);
 
 	// Initialize view counts from initial post data - now uses useRef to prevent re-renders
 	const initializeViewCount = useCallback((postId, initialCount) => {
@@ -169,11 +175,13 @@ export const ViewTrackingProvider = ({ children }) => {
 	useEffect(() => {
 		return () => {
 			// On unmount, process any pending views before component is destroyed
-			if (pendingViews.size > 0 && !isProcessing) {
-				processBatch();
+			if (pendingViews.size > 0) {
+				processBatchRef.current?.();
 			}
 		};
-	}, [pendingViews, isProcessing, processBatch]);
+		// Empty dependency array - only run on mount/unmount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<ViewTrackingContext.Provider value={value}>

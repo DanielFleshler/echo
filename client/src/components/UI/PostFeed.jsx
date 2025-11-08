@@ -43,7 +43,9 @@ export default function PostFeed({
 	);
 
 	const handleLoadMore = useCallback(async () => {
-		if (loadingPosts || loadingMore || !hasMore) return;
+		if (loadingPosts || loadingMore || !hasMore) {
+			return;
+		}
 
 		try {
 			setLoadingMore(true);
@@ -51,9 +53,7 @@ export default function PostFeed({
 		} catch (error) {
 			console.error("Error loading more posts:", error);
 		} finally {
-			if (isMounted.current) {
-				setLoadingMore(false);
-			}
+			setLoadingMore(false);
 		}
 	}, [loadingPosts, loadingMore, hasMore, loadMorePosts]);
 
