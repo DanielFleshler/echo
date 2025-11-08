@@ -26,9 +26,14 @@ router.post("/batch-view", postController.batchIncrementViews);
 
 router.post("/:id/renew", postController.renewPost);
 router.post("/:id/comments", postController.addComment);
+router.patch("/:id/comments/:commentId", postController.updateComment);
 router.delete("/:id/comments/:commentId", postController.deleteComment);
 
 router.post("/:id/comments/:commentId/replies", postController.addCommentReply);
+router.patch(
+	"/:id/comments/:commentId/replies/:replyId",
+	postController.updateCommentReply
+);
 router.delete(
 	"/:id/comments/:commentId/replies/:replyId",
 	postController.deleteCommentReply

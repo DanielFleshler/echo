@@ -10,6 +10,7 @@ export default function CommentSection({
 	post,
 	currentUser,
 	onAddComment,
+	onEditComment,
 	onDeleteComment,
 }) {
 	const [commentContent, setCommentContent] = useState("");
@@ -32,6 +33,15 @@ export default function CommentSection({
 			showError(error.message || "Failed to add comment");
 		} finally {
 			setIsSubmitting(false);
+		}
+	};
+
+	const handleEditComment = async (postId, commentId, commentContent) => {
+		try {
+			await onEditComment(postId, commentId, commentContent);
+		} catch (error) {
+			console.error("Error editing comment:", error);
+			throw error;
 		}
 	};
 
@@ -93,6 +103,7 @@ export default function CommentSection({
 								<CommentItem
 									comment={comment}
 									postId={post._id}
+									onEdit={handleEditComment}
 									onDelete={handleDeleteComment}
 								/>
 							</div>

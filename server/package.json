@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "start",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "seed": "node seedDatabase.js",
+    "seed:clean": "node cleanDB.js"
   },
   "repository": {
     "type": "git",
