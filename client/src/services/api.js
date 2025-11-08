@@ -43,15 +43,8 @@ api.interceptors.response.use(
 				// Get refresh token from localStorage
 				const refreshToken = localStorage.getItem("refreshToken");
 
-				console.log('[API Interceptor] 401 detected:', {
-					url: originalRequest.url,
-					hasRefreshToken: !!refreshToken,
-					errorMessage: error.response?.data?.message
-				});
-
 				if (!refreshToken) {
 					// No refresh token available, redirect to login
-					console.log('[API Interceptor] No refresh token, redirecting to login');
 					localStorage.removeItem("token");
 					localStorage.removeItem("refreshToken");
 					localStorage.removeItem("user");
@@ -68,7 +61,6 @@ api.interceptors.response.use(
 
 				// Save new tokens (tokens are at root level of response.data)
 				const { token, refreshToken: newRefreshToken } = response.data;
-				console.log('[API Interceptor] Token refresh successful');
 				localStorage.setItem("token", token);
 				localStorage.setItem("refreshToken", newRefreshToken);
 
@@ -79,7 +71,6 @@ api.interceptors.response.use(
 				return api(originalRequest);
 			} catch (refreshError) {
 				// Refresh failed, clear storage and redirect to login
-				console.log('[API Interceptor] Token refresh failed:', refreshError.response?.data?.message);
 				localStorage.removeItem("token");
 				localStorage.removeItem("refreshToken");
 				localStorage.removeItem("user");

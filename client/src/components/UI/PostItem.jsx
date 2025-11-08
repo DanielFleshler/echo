@@ -133,12 +133,6 @@ export default function PostItem({
 	const handleEdit = async (updatedPostData) => {
 		setIsSubmitting(true);
 		try {
-			// Make a copy of the form data entries for debugging
-			if (updatedPostData instanceof FormData) {
-				console.log("Media files in form:", updatedPostData.getAll('media'));
-				console.log("Existing media IDs:", updatedPostData.getAll('existingMediaIds'));
-			}
-			
 			const updatedPost = await updatePost(post._id, updatedPostData);
 			if (isMounted.current) {
 				setIsEditing(false);
@@ -191,7 +185,6 @@ export default function PostItem({
 	};
 
 	if (isEditing) {
-		console.log("Editing post with media:", post.media);
 		return (
 			<Card className="mb-4">
 				<div className="mb-3 flex items-center justify-between">

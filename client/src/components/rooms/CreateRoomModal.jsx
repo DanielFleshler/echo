@@ -122,8 +122,6 @@ export default function CreateRoomModal({ isOpen, onClose }) {
 			// Simulate API call
 			await new Promise((resolve) => setTimeout(resolve, 1500));
 
-			console.log("Creating room with data:", formData);
-
 			// Close modal and show success
 			onClose();
 

@@ -63,8 +63,6 @@ export const ViewTrackingProvider = ({ children }) => {
 
 		try {
 			const postIds = Array.from(pendingViews);
-			console.log(`Processing batch of ${postIds.length} views`);
-
 			const result = await PostService.batchIncrementViews(postIds);
 
 			// If batchIncrementViews was successful, 'result' contains the success data.

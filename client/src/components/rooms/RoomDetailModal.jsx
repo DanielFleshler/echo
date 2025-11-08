@@ -53,8 +53,6 @@ export default function RoomDetailModal({ room, isOpen, onClose }) {
 			// Simulate API call
 			await new Promise((resolve) => setTimeout(resolve, 1500));
 
-			console.log("Joining room:", room._id);
-
 			// Navigate to the room chat page
 			navigate(`/rooms/${room._id}`);
 		} catch (error) {
