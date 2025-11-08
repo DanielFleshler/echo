@@ -47,8 +47,7 @@ Users choose custom expiration times for their posts (hours to days), encouragin
 </td>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=Post+Expiration+Timer)
-_Replace with screenshot of post with countdown timer_
+<img width="625" height="233" alt="Image" src="https://github.com/user-attachments/assets/61b1ec38-42f5-40ca-a5d8-2393564e3ba9" />
 
 </td>
 </tr>
@@ -56,8 +55,7 @@ _Replace with screenshot of post with countdown timer_
 <tr>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=User+Profile+Page)
-_Replace with profile page screenshot_
+<img width="1487" height="833" alt="Image" src="https://github.com/user-attachments/assets/434471a5-ce1b-4833-ac96-d722852eb33c" />
 
 </td>
 <td width="50%">
@@ -92,8 +90,7 @@ Upload up to 5 images/videos per post with intelligent compression and cloud sto
 </td>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=Media+Upload+Interface)
-_Replace with media upload modal screenshot_
+<img width="604" height="344" alt="Image" src="https://github.com/user-attachments/assets/cc803602-fff8-4f94-abac-d2a49bb0da35" />
 
 </td>
 </tr>
@@ -101,8 +98,7 @@ _Replace with media upload modal screenshot_
 <tr>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=Comments+Section)
-_Replace with comments section screenshot_
+<img width="599" height="1087" alt="Image" src="https://github.com/user-attachments/assets/079b46c0-f94e-4456-ab61-f2314d07883e" />
 
 </td>
 <td width="50%">
@@ -137,8 +133,7 @@ Complete auth system with email verification, password reset, and JWT refresh to
 </td>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=Login+Page)
-_Replace with login page screenshot_
+<img width="727" height="833" alt="Image" src="https://github.com/user-attachments/assets/96fdef0a-c30e-47db-a801-a2368e626590" />
 
 </td>
 </tr>
@@ -146,8 +141,7 @@ _Replace with login page screenshot_
 <tr>
 <td width="50%">
 
-![Screenshot Placeholder](https://via.placeholder.com/500x300/1a1a2e/16213e?text=Trending+Posts)
-_Replace with trending posts section screenshot_
+<img width="287" height="662" alt="Image" src="https://github.com/user-attachments/assets/6ec6a294-312f-4152-8a77-bde1bd36057b" />
 
 </td>
 <td width="50%">
