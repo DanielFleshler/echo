@@ -19,6 +19,8 @@ const sendToken = async (user, statusCode, res) => {
 			Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
 		),
 		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "strict",
 	};
 
 	const refreshCookieOptions = {
@@ -27,6 +29,8 @@ const sendToken = async (user, statusCode, res) => {
 				(process.env.REFRESH_TOKEN_EXPIRES_IN || 7) * 24 * 60 * 60 * 1000
 		),
 		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "strict",
 		path: "/api/v1/users/refresh-token", // Only send refresh token to refresh endpoint
 	};
 
@@ -77,7 +81,7 @@ exports.login = async (req, res) => {
 
 		return sendToken(user, 200, res);
 	} catch (error) {
-		console.log(error);
+		console.error("Login error:", error);
 		return sendError(res, 500, "An error occurred during login");
 	}
 };
@@ -385,6 +389,8 @@ exports.refreshToken = async (req, res) => {
 				Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
 			),
 			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
 		};
 
 		const refreshCookieOptions = {
@@ -393,6 +399,8 @@ exports.refreshToken = async (req, res) => {
 					(process.env.REFRESH_TOKEN_EXPIRES_IN || 7) * 24 * 60 * 60 * 1000
 			),
 			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
 			path: "/api/v1/users/refresh-token",
 		};
 
