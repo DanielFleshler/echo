@@ -1,18 +1,131 @@
-import {
-	Bell,
-	Clock,
-	Heart,
-	MessageCircle,
-	Star,
-	User,
-	Users,
-} from "lucide-react";
-import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import Card from "./Card";
+import { Bell, Clock, Heart, MessageCircle, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
+	const [notifications, setNotifications] = useState([]);
+	const [loading, setLoading] = useState(false);
 	const dropdownRef = useRef(null);
+	const navigate = useNavigate();
+
+	// Fetch notifications when dropdown opens
+	useEffect(() => {
+		if (isOpen) {
+			fetchNotifications();
+		}
+	}, [isOpen]);
+
+	const fetchNotifications = async () => {
+		setLoading(true);
+		try {
+			const response = await api.get("/notifications?page=1");
+			setNotifications(response.data.data.notifications);
+		} catch (error) {
+			console.error("Error fetching notifications:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleMarkAsRead = async (notificationId) => {
+		try {
+			await api.patch(`/notifications/${notificationId}/read`);
+			// Update local state
+			setNotifications((prev) =>
+				prev.map((notif) =>
+					notif._id === notificationId ? { ...notif, read: true } : notif
+				)
+			);
+		} catch (error) {
+			console.error("Error marking notification as read:", error);
+		}
+	};
+
+	const handleMarkAllAsRead = async () => {
+		try {
+			await api.patch("/notifications/mark-all-read");
+			// Update all notifications to read
+			setNotifications((prev) =>
+				prev.map((notif) => ({ ...notif, read: true }))
+			);
+		} catch (error) {
+			console.error("Error marking all notifications as read:", error);
+		}
+	};
+
+	const handleNotificationClick = (notification) => {
+		// Mark as read
+		if (!notification.read) {
+			handleMarkAsRead(notification._id);
+		}
+
+		// Navigate based on notification type
+		if (notification.type === "follow") {
+			navigate(`/profile/${notification.sender._id}`);
+		} else if (
+			notification.type === "comment" ||
+			notification.type === "reply"
+		) {
+			navigate(`/post/${notification.post}`);
+		}
+
+		onClose();
+	};
+
+	// Helper: Get icon based on notification type
+	const getNotificationIcon = (type) => {
+		switch (type) {
+			case "follow":
+				return <User className="h-4 w-4 text-purple-400" />;
+			case "comment":
+				return <MessageCircle className="h-4 w-4 text-blue-400" />;
+			case "reply":
+				return <MessageCircle className="h-4 w-4 text-blue-400" />;
+			case "like":
+				return <Heart className="h-4 w-4 text-red-400" />;
+			default:
+				return <Bell className="h-4 w-4 text-gray-400" />;
+		}
+	};
+
+	// Helper: Get notification content text
+	const getNotificationContent = (notification) => {
+		switch (notification.type) {
+			case "follow":
+				return "started following you";
+			case "comment":
+				return "commented on your post";
+			case "reply":
+				return "replied to your comment";
+			case "like":
+				return "liked your post";
+			default:
+				return "sent you a notification";
+		}
+	};
+
+	// Helper: Format time as "2 minutes ago"
+	const formatTimeAgo = (timestamp) => {
+		const now = new Date();
+		const past = new Date(timestamp);
+		const diffInSeconds = Math.floor((now - past) / 1000);
+
+		if (diffInSeconds < 60) return "Just now";
+		if (diffInSeconds < 3600) {
+			const mins = Math.floor(diffInSeconds / 60);
+			return `${mins} minute${mins > 1 ? "s" : ""} ago`;
+		}
+		if (diffInSeconds < 86400) {
+			const hours = Math.floor(diffInSeconds / 3600);
+			return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+		}
+		if (diffInSeconds < 604800) {
+			const days = Math.floor(diffInSeconds / 86400);
+			return `${days} day${days > 1 ? "s" : ""} ago`;
+		}
+		return past.toLocaleDateString();
+	};
 
 	// Close the dropdown when clicking outside
 	useEffect(() => {
@@ -43,59 +156,20 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 		  }
 		: {};
 
-	const mockNotifications = [
-		{
-			id: 1,
-			type: "like",
-			user: "Alex Johnson",
-			content: 'liked your post: "Just released a new...',
-			time: "2 minutes ago",
-			read: false,
-			icon: <Heart className="h-4 w-4 text-red-400" />,
-		},
-		{
-			id: 2,
-			type: "comment",
-			user: "Morgan Smith",
-			content: "commented on your post",
-			time: "1 hour ago",
-			read: false,
-			icon: <MessageCircle className="h-4 w-4 text-blue-400" />,
-		},
-		{
-			id: 3,
-			type: "follow",
-			user: "Taylor Swift",
-			content: "started following you",
-			time: "3 hours ago",
-			read: true,
-			icon: <User className="h-4 w-4 text-purple-400" />,
-		},
-		{
-			id: 4,
-			type: "mention",
-			user: "Jordan Lee",
-			content: "mentioned you in a comment",
-			time: "Yesterday",
-			read: true,
-			icon: <Star className="h-4 w-4 text-yellow-400" />,
-		},
-	];
-
 	return (
 		<>
 			<style>{`
-                        .max-h-96.overflow-y-auto::-webkit-scrollbar {
-                                display: none;
-                        }
-                `}</style>
+                                .max-h-96.overflow-y-auto::-webkit-scrollbar {
+                                        display: none;
+                                }
+                        `}</style>
 			<div
 				className="fixed inset-0 z-40 bg-transparent"
 				onClick={onClose}
 			></div>
 			<div
 				ref={dropdownRef}
-				className="rounded-xl border border-gray-800/50 bg-gray-900/90 backdrop-blur-sm shadow-xl transform
+				className="rounded-xl border border-gray-800/50 bg-gray-900/90 backdrop-blur-sm shadow-xl transform 
   transition-all duration-200 ease-out z-50 overflow-hidden"
 				style={{
 					...style,
@@ -104,7 +178,7 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 			>
 				{/* Small decorative arrow pointing up to navbar */}
 				<div
-					className="absolute w-4 h-4 bg-gray-900/90 backdrop-blur-sm border-t border-l border-gray-800/50 transform
+					className="absolute w-4 h-4 bg-gray-900/90 backdrop-blur-sm border-t border-l border-gray-800/50 transform 
   rotate-45 -translate-y-2"
 					style={{
 						top: "0",
@@ -120,39 +194,58 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 					}}
 				>
 					{/* Header */}
-					<div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/50 p-3.5 flex justify-between items-center">
+					<div
+						className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/50 p-3.5 flex 
+  justify-between items-center"
+					>
 						<h3 className="font-medium text-white flex items-center gap-2">
 							<Bell className="h-4 w-4 text-purple-400" />
 							Notifications
 						</h3>
-						<button className="text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200">
+						<button
+							onClick={handleMarkAllAsRead}
+							className="text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200"
+						>
 							Mark all as read
 						</button>
 					</div>
 
 					{/* Notifications List */}
-					{mockNotifications.length > 0 ? (
+					{loading ? (
+						<div className="py-12 text-center">
+							<div
+								className="mx-auto mb-4 h-14 w-14 rounded-full bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-4 
+  flex items-center justify-center"
+							>
+								<Bell className="h-6 w-6 text-gray-500 animate-pulse" />
+							</div>
+							<p className="text-sm text-gray-400">Loading notifications...</p>
+						</div>
+					) : notifications.length > 0 ? (
 						<div>
-							{mockNotifications.map((notification) => (
+							{notifications.map((notification) => (
 								<div
-									key={notification.id}
-									className={`p-3.5 border-b border-gray-800/30 hover:bg-gray-800/50 transition-colors duration-200 flex gap-3 items-start ${
-										!notification.read ? "bg-gray-800/20" : ""
-									}`}
+									key={notification._id}
+									className={`p-3.5 border-b border-gray-800/30 hover:bg-gray-800/50 transition-colors duration-200 flex gap-3
+   items-start cursor-pointer ${!notification.read ? "bg-gray-800/20" : ""}`}
+									onClick={() => handleNotificationClick(notification)}
 								>
-									<div className="h-9 w-9 rounded-full bg-gradient-to-br from-purple-700/30 to-blue-700/30 flex items-center justify-center flex-shrink-0 shadow-sm">
-										{notification.icon}
+									<div
+										className="h-9 w-9 rounded-full bg-gradient-to-br from-purple-700/30 to-blue-700/30 flex items-center 
+  justify-center flex-shrink-0 shadow-sm"
+									>
+										{getNotificationIcon(notification.type)}
 									</div>
 									<div className="flex-1 min-w-0">
 										<p className="text-sm text-gray-300">
 											<span className="font-medium text-white">
-												{notification.user}
+												{notification.sender.fullName}
 											</span>{" "}
-											{notification.content}
+											{getNotificationContent(notification)}
 										</p>
 										<p className="text-xs text-gray-400 flex items-center gap-1.5 mt-1">
 											<Clock className="h-3 w-3" />
-											{notification.time}
+											{formatTimeAgo(notification.createdAt)}
 										</p>
 									</div>
 									{!notification.read && (
@@ -163,7 +256,10 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 						</div>
 					) : (
 						<div className="py-12 text-center">
-							<div className="mx-auto mb-4 h-14 w-14 rounded-full bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-4 flex items-center justify-center">
+							<div
+								className="mx-auto mb-4 h-14 w-14 rounded-full bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-4 
+  flex items-center justify-center"
+							>
 								<Bell className="h-6 w-6 text-gray-500" />
 							</div>
 							<h3 className="text-base font-medium text-white">
@@ -178,8 +274,9 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 					{/* Footer */}
 					<div className="p-3.5 text-center border-t border-gray-800/50 bg-gray-900/70">
 						<Link
-							to="#"
+							to="/notifications"
 							className="text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200 font-medium"
+							onClick={onClose}
 						>
 							View all notifications
 						</Link>

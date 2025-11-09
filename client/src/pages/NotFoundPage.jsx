@@ -10,7 +10,7 @@ export default function NotFoundPage() {
 						<Sparkles className="h-10 w-10 text-purple-500" />
 					</div>
 				</div>
-				
+
 				<div className="space-y-2">
 					<h1 className="text-4xl font-bold text-white">404</h1>
 					<h2 className="text-xl font-semibold text-gray-200">
@@ -21,20 +21,13 @@ export default function NotFoundPage() {
 					</p>
 				</div>
 
-				<div className="flex flex-row gap-4">
+				<div className="flex flex-row justify-center">
 					<Link
 						to="/"
 						className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 text-center font-medium text-white hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all duration-200 shadow-md shadow-purple-900/20"
 					>
 						<ArrowLeft className="h-5 w-5" />
 						Back to home
-					</Link>
-					<Link
-						to="/search"
-						className="flex items-center justify-center gap-2 rounded-lg border border-gray-800/80 bg-gray-900/50 px-6 py-3 text-center font-medium text-white hover:bg-gray-800/80 focus:outline-none focus:ring-2 focus:ring-gray-500/20 transition-all duration-200"
-					>
-						<Search className="h-5 w-5" />
-						Search for content
 					</Link>
 				</div>
 			</div>
