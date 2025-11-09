@@ -11,6 +11,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import NotificationsDropdown from "../UI/NotificationsDropdown";
 import ProfileAvatar from "../UI/ProfileAvatar";
 import SearchModal from "../UI/SearchModal";
@@ -23,6 +24,7 @@ export default function Header() {
 	const notificationsButtonRef = useRef(null);
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [notificationsAnchorRect, setNotificationsAnchorRect] = useState(null);
+	const [unreadCount, setUnreadCount] = useState(0);
 	const location = useLocation();
 
 	const handleLogout = async () => {
@@ -30,6 +32,16 @@ export default function Header() {
 			await logout();
 		} catch (err) {
 			console.error("Logout failed:", err);
+		}
+	};
+
+	const fetchUnreadCount = async () => {
+		try {
+			const response = await api.get("/notifications/unread-count");
+			const { unreadCount } = response.data.data;
+			setUnreadCount(unreadCount);
+		} catch (error) {
+			console.error("Error fetching unread notifications count:", error);
 		}
 	};
 
@@ -64,6 +76,12 @@ export default function Header() {
 			location.pathname === path || location.pathname.startsWith(`${path}/`)
 		);
 	};
+
+	useEffect(() => {
+		fetchUnreadCount();
+		const interval = setInterval(fetchUnreadCount, 30000);
+		return () => clearInterval(interval);
+	}, []);
 
 	return (
 		<>
@@ -118,10 +136,14 @@ export default function Header() {
 						>
 							<Bell className="h-4 w-4" />
 							Notifications
-							<span className="flex h-1.5 w-1.5 relative">
-								<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-								<span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
-							</span>
+							{unreadCount > 0 && (
+								<span
+									className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full 
+  bg-purple-500 text-[10px] font-bold text-white"
+								>
+									{unreadCount > 9 ? "9+" : unreadCount}
+								</span>
+							)}
 						</button>
 					</nav>
 
@@ -186,6 +208,7 @@ export default function Header() {
 				isOpen={isNotificationsOpen}
 				onClose={handleCloseNotifications}
 				anchorRect={notificationsAnchorRect}
+				onNotificationUpdate={fetchUnreadCount}
 			/>
 		</>
 	);

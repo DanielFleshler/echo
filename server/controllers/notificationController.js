@@ -89,3 +89,18 @@ exports.markAllAsRead = async (req, res) => {
 		return sendError(res, 500, "Error marking all notifications as read");
 	}
 };
+
+exports.getUnreadCount = async (req, res) => {
+	try {
+		const unreadCount = await Notification.countDocuments({
+			recipient: req.user._id,
+			read: false,
+		});
+
+		return sendSuccess(res, 200, "Unread notifications count retrieved", {
+			data: { unreadCount },
+		});
+	} catch (error) {
+		return sendError(res, 500, "Error fetching unread notifications count");
+	}
+};

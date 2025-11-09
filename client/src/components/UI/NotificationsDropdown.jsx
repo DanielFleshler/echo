@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
-export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
+export default function NotificationsDropdown({
+	isOpen,
+	onClose,
+	anchorRect,
+	onNotificationUpdate,
+}) {
 	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [loadingMore, setLoadingMore] = useState(false);
@@ -64,6 +69,7 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 					notif._id === notificationId ? { ...notif, read: true } : notif
 				)
 			);
+			onNotificationUpdate?.();
 		} catch (error) {
 			console.error("Error marking notification as read:", error);
 		}
@@ -76,6 +82,7 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 			setNotifications((prev) =>
 				prev.map((notif) => ({ ...notif, read: true }))
 			);
+			onNotificationUpdate?.();
 		} catch (error) {
 			console.error("Error marking all notifications as read:", error);
 		}
