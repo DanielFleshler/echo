@@ -20,10 +20,10 @@ Echo is a modern social media platform where authenticity meets ephemerality. Bu
 
 - 🏗️ **Full-Stack Architecture** - Designed and implemented complete MERN stack application from scratch
 - 🔐 **Secure Authentication** - Built comprehensive auth system with JWT, refresh tokens, and email verification
-- 📱 **Real-Time Features** - Implemented batch view tracking and optimized data synchronization
+- 📱 **Real-Time Features** - Implemented batch view tracking, polling-based notifications, and optimized data synchronization
 - 🎨 **Modern UI/UX** - Created responsive, accessible interface with Tailwind CSS and dark mode
 - ☁️ **Cloud Integration** - Integrated Cloudinary for scalable media storage and FFmpeg for video compression
-- 🚀 **Performance Optimization** - Implemented pagination, lazy loading, and efficient state management
+- 🚀 **Performance Optimization** - Implemented pagination, lazy loading, debouncing, and efficient state management
 - 🧪 **Production-Ready** - Built with error handling, security best practices, and scalable architecture
 
 ---
@@ -160,6 +160,75 @@ Discover popular content with intelligent view tracking and trending calculation
 </td>
 </tr>
 
+<tr>
+<td width="50%">
+
+### 🔍 Live Search System
+
+Instant user search with debounced API calls and smart result filtering.
+
+**Technical Implementation:**
+
+- MongoDB regex search on username/fullName
+- 300ms debouncing with useEffect cleanup
+- Search-as-you-type with 2-character minimum
+- Result limit of 7 users for performance
+- Backend filtering for scalability
+
+</td>
+<td width="50%">
+
+<img width="625" height="400" alt="Search Feature" src="https://via.placeholder.com/625x400/1a1a2e/9333ea?text=Search+Users" />
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+<img width="625" height="400" alt="Notifications" src="https://via.placeholder.com/625x400/1a1a2e/9333ea?text=Notifications" />
+
+</td>
+<td width="50%">
+
+### 🔔 Notification System
+
+Stay updated with follow, comment, and reply notifications with real-time unread badges.
+
+**Technical Implementation:**
+
+- Polling architecture (30-second intervals)
+- MongoDB indexes for recipient + createdAt
+- Pagination with "Load more" functionality
+- Conditional notification creation
+- Instant badge updates on mark as read
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### 🗑️ Secure Account Deletion
+
+Password-protected account deletion with comprehensive warning system.
+
+**Technical Implementation:**
+
+- Hard delete with password verification
+- bcrypt password comparison
+- Modal confirmation with danger warnings
+- Graceful logout after deletion
+- Posts/comments persist as "Deleted User"
+
+</td>
+<td width="50%">
+
+<img width="625" height="400" alt="Account Deletion" src="https://via.placeholder.com/625x400/1a1a2e/dc2626?text=Delete+Account" />
+
+</td>
+</tr>
+
 </table>
 
 ---
@@ -234,6 +303,25 @@ Scalable approach to handling large files:
 
 ```
 Client Upload → Multer → FFmpeg (>100MB) → Cloudinary → Database
+```
+
+#### **5. Polling for Notifications**
+
+Chose polling over WebSockets for notification delivery:
+
+- **Simplicity** - Easier to implement and maintain
+- **Reliability** - No connection state management
+- **Scalability** - Stateless architecture, easier to scale horizontally
+- **Acceptable Latency** - 30-second updates sufficient for notifications
+- **Future-Ready** - Easy migration path to WebSockets if needed
+
+```javascript
+// Background polling with cleanup
+useEffect(() => {
+  fetchUnreadCount();
+  const interval = setInterval(fetchUnreadCount, 30000);
+  return () => clearInterval(interval);
+}, []);
 ```
 
 ---
@@ -326,6 +414,58 @@ Post.updateMany(
 
 **Result:** Accurate view counts and trending algorithm.
 
+---
+
+### Challenge 5: Preventing Memory Leaks in Debounced Search
+
+**Problem:** Debouncing with setTimeout created potential for state updates after unmount and redundant API calls.
+
+**Solution:**
+
+```javascript
+useEffect(() => {
+  if (searchQuery.length < 2) {
+    setSearchResults([]);
+    return;
+  }
+
+  setSearching(true);
+  const timer = setTimeout(async () => {
+    try {
+      const response = await api.get(`/users/search?q=${searchQuery}`);
+      setSearchResults(response.data.data.users);
+    } finally {
+      setSearching(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(timer); // Cleanup on every re-render
+}, [searchQuery]);
+```
+
+**Result:** Efficient search-as-you-type with proper cleanup and no memory leaks.
+
+---
+
+### Challenge 6: Notification Creation Timing Bug
+
+**Problem:** Creating notifications before saving comments resulted in attempting to access non-existent comment IDs.
+
+**Solution:**
+
+```javascript
+// WRONG: Creating notification before save
+await Notification.create({ comment: newComment._id }); // ID doesn't exist yet!
+await post.save();
+
+// CORRECT: Create notification AFTER save
+await post.save();
+const savedComment = post.comments[post.comments.length - 1];
+await Notification.create({ comment: savedComment._id }); // ID exists
+```
+
+**Result:** Reliable notification creation with proper data integrity.
+
 ## 🎨 Design System
 
 ### Color Palette
@@ -389,10 +529,10 @@ CLOUDINARY_API_SECRET=...
 
 | Metric            | Value                |
 | ----------------- | -------------------- |
-| Lines of Code     | ~15,000+             |
-| Components        | 30+ React components |
-| API Endpoints     | 25+ RESTful routes   |
-| Database Models   | 3 main schemas       |
+| Lines of Code     | ~16,000+             |
+| Components        | 35+ React components |
+| API Endpoints     | 30+ RESTful routes   |
+| Database Models   | 4 main schemas       |
 | Context Providers | 5 contexts           |
 | Development Time  | 2-3 months           |
 
@@ -405,9 +545,10 @@ CLOUDINARY_API_SECRET=...
 ### Planned Features
 
 - [ ] **Real-time Messaging** - WebSocket-based DM system
-- [ ] **Search Functionality** - Full-text search with filters
-- [ ] **Push Notifications** - Browser notifications for interactions
+- [ ] **Advanced Search** - Full-text search for posts and comments with filters
+- [ ] **Browser Push Notifications** - Service worker for background notifications
 - [ ] **Anonymous Chat Rooms** - Complete backend integration
+- [ ] **WebSocket Notifications** - Upgrade from polling to real-time WebSocket connection
 
 ## 📂 Project Structure
 
@@ -416,7 +557,10 @@ echo/
 ├── client/                    # Frontend React application
 │   ├── src/
 │   │   ├── components/       # Reusable UI components
-│   │   │   ├── UI/          # PostItem, PostForm, Card, etc.
+│   │   │   ├── UI/          # PostItem, PostForm, SearchModal, etc.
+│   │   │   │   ├── NotificationsDropdown.jsx
+│   │   │   │   ├── DeleteAccountModal.jsx
+│   │   │   │   └── SearchModal.jsx
 │   │   │   ├── layout/      # Header, Layout, ProtectedRoute
 │   │   │   └── profile/     # Profile components
 │   │   ├── context/         # React Context providers
@@ -426,6 +570,8 @@ echo/
 │   │   │   └── ToastContext.jsx
 │   │   ├── pages/           # Route pages
 │   │   ├── services/        # API integration layer
+│   │   │   ├── api.js
+│   │   │   └── user.service.js
 │   │   ├── hooks/           # Custom React hooks
 │   │   └── utils/           # Helper functions
 │   └── package.json
@@ -434,12 +580,20 @@ echo/
     ├── controllers/         # Business logic
     │   ├── authController.js
     │   ├── postController.js
-    │   └── followerController.js
+    │   ├── userController.js
+    │   ├── followerController.js
+    │   ├── notificationController.js
+    │   └── searchController.js
     ├── models/             # Mongoose schemas
     │   ├── userModel.js
     │   ├── postModel.js
-    │   └── followerModel.js
+    │   ├── followerModel.js
+    │   └── notificationModel.js
     ├── routes/             # API routes
+    │   ├── userRoutes.js
+    │   ├── postRoutes.js
+    │   ├── followerRoutes.js
+    │   └── notificationRoutes.js
     ├── middlewares/        # Custom middleware
     │   ├── auth.js
     │   └── upload.js
@@ -457,10 +611,13 @@ echo/
 
 - ✅ Authentication flows (signup, login, OTP, password reset)
 - ✅ Post CRUD operations (create, edit, delete, renew)
-- ✅ Comment system (add, reply, delete)
+- ✅ Comment system (add, reply, delete, edit)
 - ✅ Follow/unfollow functionality
 - ✅ Media upload with compression
 - ✅ View tracking and trending algorithm
+- ✅ User search with debouncing
+- ✅ Notification system (follow, comment, reply)
+- ✅ Account deletion with password verification
 - ✅ Responsive design on multiple devices
 - ✅ Error handling and edge cases
 
@@ -531,17 +688,23 @@ echo/
 - Responsive design with Tailwind CSS
 - Form validation and error handling
 - Optimistic UI updates
+- Debouncing and performance optimization
+- Polling architecture with cleanup patterns
+- Modal components with controlled state
 
 ### Backend Development
 
 - RESTful API design
 - Express.js server architecture
-- MongoDB database design
-- Mongoose ODM with schemas and middleware
+- MongoDB database design with indexes
+- Mongoose ODM with schemas, middleware, and virtual properties
 - JWT authentication and authorization
 - File upload and processing
 - Email service integration
 - Cron jobs for scheduled tasks
+- MongoDB regex search with optimization
+- Conditional schema validation
+- Password verification and secure deletion
 
 ### System Design
 
