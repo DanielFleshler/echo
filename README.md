@@ -118,7 +118,7 @@ Threaded discussions with comment replies, real-time updates, and author control
 
 <tr>
 <td width="50%">
-
+</table>
 ### 🔒 Secure Authentication Flow
 
 Complete auth system with email verification, password reset, and JWT refresh tokens.
