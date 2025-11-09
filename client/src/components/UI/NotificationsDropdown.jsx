@@ -273,7 +273,7 @@ export default function NotificationsDropdown({
 									<div className="flex-1 min-w-0">
 										<p className="text-sm text-gray-300">
 											<span className="font-medium text-white">
-												{notification.sender.fullName}
+												{notification.sender?.fullName || "Deleted User"}
 											</span>{" "}
 											{getNotificationContent(notification)}
 										</p>
