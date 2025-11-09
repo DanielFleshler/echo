@@ -1,31 +1,58 @@
 import { Bell, Clock, Heart, MessageCircle, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [hasMore, setHasMore] = useState(false);
 	const dropdownRef = useRef(null);
 	const navigate = useNavigate();
 
 	// Fetch notifications when dropdown opens
 	useEffect(() => {
 		if (isOpen) {
-			fetchNotifications();
+			setCurrentPage(1);
+			setHasMore(false);
+			fetchNotifications(1);
 		}
 	}, [isOpen]);
 
-	const fetchNotifications = async () => {
-		setLoading(true);
+	const fetchNotifications = async (page = 1) => {
+		if (page === 1) {
+			setLoading(true);
+		} else {
+			setLoadingMore(true);
+		}
+
 		try {
-			const response = await api.get("/notifications?page=1");
-			setNotifications(response.data.data.notifications);
+			const response = await api.get(`/notifications?page=${page}`);
+			const { notifications: newNotifications, pagination } =
+				response.data.data;
+
+			if (page === 1) {
+				// First page: replace notifications
+				setNotifications(newNotifications);
+			} else {
+				// Subsequent pages: append notifications
+				setNotifications((prev) => [...prev, ...newNotifications]);
+			}
+
+			setCurrentPage(page);
+			setHasMore(pagination.hasMore);
 		} catch (error) {
 			console.error("Error fetching notifications:", error);
 		} finally {
 			setLoading(false);
+			setLoadingMore(false);
 		}
+	};
+
+	const loadMore = () => {
+		fetchNotifications(currentPage + 1);
 	};
 
 	const handleMarkAsRead = async (notificationId) => {
@@ -271,16 +298,19 @@ export default function NotificationsDropdown({ isOpen, onClose, anchorRect }) {
 						</div>
 					)}
 
-					{/* Footer */}
-					<div className="p-3.5 text-center border-t border-gray-800/50 bg-gray-900/70">
-						<Link
-							to="/notifications"
-							className="text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200 font-medium"
-							onClick={onClose}
-						>
-							View all notifications
-						</Link>
-					</div>
+					{/* Load More Button */}
+					{hasMore && (
+						<div className="p-3.5 text-center border-t border-gray-800/50 bg-gray-900/70">
+							<button
+								onClick={loadMore}
+								disabled={loadingMore}
+								className="text-xs text-purple-400 hover:text-purple-300 transition-colors duration-200 font-medium 
+  disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{loadingMore ? "Loading..." : "Load more notifications"}
+							</button>
+						</div>
+					)}
 				</div>
 			</div>
 		</>
