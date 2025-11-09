@@ -6,6 +6,7 @@ const {
 	upload,
 	uploadAndCompress,
 } = require("../middlewares/uploadMiddleware");
+const searchController = require("../controllers/searchController");
 const router = express.Router();
 
 router.post("/signup", authController.signup);
@@ -23,6 +24,7 @@ router.use(authController.protect);
 
 router.use(authController.requireVerification);
 router.get("/me", userController.getMe);
+router.get("/search", searchController.searchUsers);
 router.get("/:id", userController.getUserById);
 router.patch("/me", userController.updateMe);
 router.patch("/update-password", userController.updatePassword);
@@ -34,4 +36,5 @@ router.patch(
 router.delete("/delete-profile-picture", userController.deleteProfilePicture);
 router.patch("/updateProfileInfo", userController.updateProfileInfo);
 router.patch("/updateMe", userController.updateMe);
+
 module.exports = router;

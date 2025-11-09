@@ -50,24 +50,17 @@ export default function SearchModal({ isOpen, onClose, anchorRect }) {
 		};
 	}, [isOpen, onClose]);
 
-	// This is a placeholder function that will be replaced with actual search logic later
 	const handleSearch = (e) => {
 		e.preventDefault();
-		if (!searchQuery.trim()) return;
-
-		setSearching(true);
-
-		// Simulate search delay
-		setTimeout(() => {
-			// Just a placeholder result
+		if (searchQuery.length < 2) {
 			setSearchResults([]);
-			setSearching(false);
-		}, 1000);
+			return;
+		}
+		setSearching(true);
 	};
 
 	if (!isOpen) return null;
 
-	// Position the search bubble relative to the navbar button
 	const style = anchorRect
 		? {
 				position: "fixed",
