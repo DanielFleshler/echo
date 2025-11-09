@@ -289,3 +289,40 @@ exports.deleteProfilePicture = async (req, res) => {
 		});
 	}
 };
+
+exports.deleteAccount = async (req, res) => {
+	try {
+		const { password } = req.body;
+
+		if (!password) {
+			return sendError(res, 400, "Password is required to delete your account");
+		}
+
+		// Get user with password field
+		const user = await User.findById(req.user._id).select("+password");
+
+		if (!user) {
+			return sendError(res, 404, "User not found");
+		}
+
+		// Verify password
+		const isPasswordCorrect = await user.comparePassword(password);
+		if (!isPasswordCorrect) {
+			return sendError(res, 401, "Incorrect password");
+		}
+
+		// Delete the user account
+		await User.findByIdAndDelete(req.user._id);
+
+		// Note: Posts and comments will remain but show "Deleted User" on frontend
+		// since the user reference will be null when populated
+
+		return sendSuccess(res, 200, "Account deleted successfully", {
+			data: null,
+		});
+	} catch (error) {
+		return sendError(res, 500, "Error deleting account", {
+			error: process.env.NODE_ENV === "development" ? error.message : undefined,
+		});
+	}
+};
