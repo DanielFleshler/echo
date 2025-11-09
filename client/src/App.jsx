@@ -9,9 +9,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import OTPVerificationPage from "./pages/OTPVerificationPage";
 import ProfilePage from "./pages/ProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import RoomsPage from "./pages/RoomsPage";
 import RoomChatPage from "./pages/RoomChatPage";
-import SearchPage from "./pages/SearchPage";
+import RoomsPage from "./pages/RoomsPage";
 import SettingsPage from "./pages/SettingsPage";
 import SignupPage from "./pages/SignupPage";
 import SuccessPage from "./pages/SuccessPage";
@@ -58,16 +57,6 @@ function App() {
 							<ProtectedRoute>
 								<Layout>
 									<SettingsPage />
-								</Layout>
-							</ProtectedRoute>
-						}
-					/>
-					<Route
-						path="/search"
-						element={
-							<ProtectedRoute>
-								<Layout>
-									<SearchPage />
 								</Layout>
 							</ProtectedRoute>
 						}
