@@ -196,8 +196,6 @@ Discover popular content with intelligent view tracking and trending calculation
 
 ## 🏗️ System Architecture
 
-![Screenshot Placeholder](https://via.placeholder.com/1200x400/1a1a2e/16213e?text=System+Architecture+Diagram)
-_Replace with architecture diagram showing client-server-database flow_
 
 ### Key Architectural Decisions
 
