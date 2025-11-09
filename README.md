@@ -191,47 +191,6 @@ Instant user search with debounced API calls and smart result filtering.
 </td>
 <td width="50%">
 
-### 🔔 Notification System
-
-Stay updated with follow, comment, and reply notifications with real-time unread badges.
-
-**Technical Implementation:**
-
-- Polling architecture (30-second intervals)
-- MongoDB indexes for recipient + createdAt
-- Pagination with "Load more" functionality
-- Conditional notification creation
-- Instant badge updates on mark as read
-
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-
-### 🗑️ Secure Account Deletion
-
-Password-protected account deletion with comprehensive warning system.
-
-**Technical Implementation:**
-
-- Hard delete with password verification
-- bcrypt password comparison
-- Modal confirmation with danger warnings
-- Graceful logout after deletion
-- Posts/comments persist as "Deleted User"
-
-</td>
-<td width="50%">
-
-<img width="625" height="400" alt="Account Deletion" src="https://via.placeholder.com/625x400/1a1a2e/dc2626?text=Delete+Account" />
-
-</td>
-</tr>
-
-</table>
-
----
 
 ## 🛠️ Technical Stack
 
