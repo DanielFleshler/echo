@@ -326,45 +326,6 @@ Post.updateMany(
 
 **Result:** Accurate view counts and trending algorithm.
 
----
-
-## 📱 Responsive Design
-
-<table>
-<tr>
-<td width="33%">
-
-### Desktop
-
-![Screenshot Placeholder](https://via.placeholder.com/350x600/1a1a2e/16213e?text=Desktop+View)
-
-</td>
-<td width="33%">
-
-### Tablet
-
-![Screenshot Placeholder](https://via.placeholder.com/300x600/1a1a2e/16213e?text=Tablet+View)
-
-</td>
-<td width="33%">
-
-### Mobile
-
-![Screenshot Placeholder](https://via.placeholder.com/200x600/1a1a2e/16213e?text=Mobile+View)
-
-</td>
-</tr>
-</table>
-
-**Responsive Features:**
-
-- Fluid layouts with Tailwind breakpoints
-- Touch-optimized mobile navigation
-- Adaptive media grid (1-3 columns)
-- Mobile-first design approach
-
----
-
 ## 🎨 Design System
 
 ### Color Palette
