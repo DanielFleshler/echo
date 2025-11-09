@@ -586,9 +586,9 @@ echo/
 
 ### Signup & Verification Flow
 
-<img width="599" height="832" alt="Image" src="https://github.com/user-attachments/assets/48ea72d5-866f-4d4f-b999-df1fc9c66c3c" />
-<img width="603" height="1128" alt="Image" src="https://github.com/user-attachments/assets/356f695e-b2b7-42b9-b85b-4f6bc85123f7" />
-<img width="599" height="831" alt="Image" src="https://github.com/user-attachments/assets/f966ffc7-a5a6-4152-aa5e-c6c7fad8cac1" />
+<img width="599" height="832" alt="Image" src="https://github.com/user-attachments/assets/64b51732-bdc4-4562-a725-5c8da77c4b9f" />
+<img width="548" height="447" alt="Image" src="https://github.com/user-attachments/assets/0335d60c-7ea4-4067-9954-0f91f990d427" />
+<img width="599" height="831" alt="Image" src="https://github.com/user-attachments/assets/fb4139dc-aedb-4107-8149-e65ba4ce96d2" />
 
 ### Email Templates
 
