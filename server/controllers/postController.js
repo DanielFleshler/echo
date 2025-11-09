@@ -1,6 +1,7 @@
 const Post = require("../models/postModel");
 const fs = require("fs");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
+const Notification = require("../models/notificationModel");
 const {
 	populatePostFields,
 	enhancePostWithVirtuals,
@@ -139,7 +140,11 @@ exports.getAllPosts = async (req, res) => {
 		const posts = await populatePostFields(findQuery);
 		const enhancedPosts = enhancePostsWithVirtuals(posts);
 
-		console.log(`[getAllPosts] Page ${page}, Limit ${limit}, Returned ${enhancedPosts.length} posts, Total: ${totalPosts}, HasMore: ${pagination.totalPages > page}`);
+		console.log(
+			`[getAllPosts] Page ${page}, Limit ${limit}, Returned ${
+				enhancedPosts.length
+			} posts, Total: ${totalPosts}, HasMore: ${pagination.totalPages > page}`
+		);
 
 		return sendSuccess(res, 200, "Posts retrieved successfully", {
 			data: {
@@ -314,6 +319,16 @@ exports.addComment = async (req, res) => {
 		post.comments.push(newComment);
 		await post.save();
 
+		if (post.user.toString() !== req.user._id.toString()) {
+			await Notification.create({
+				recipient: post.user,
+				sender: req.user._id,
+				type: "comment",
+				post: post._id,
+				comment: post.comments[post.comments.length - 1]._id, // Latest comment
+			});
+		}
+
 		post = await populatePostFields(Post.findById(post._id));
 
 		return sendSuccess(res, 201, "Comment added successfully", {
@@ -438,7 +453,19 @@ exports.addCommentReply = async (req, res) => {
 		post.comments[commentIndex].replies =
 			post.comments[commentIndex].replies || [];
 		post.comments[commentIndex].replies.push(newReply);
+
 		await post.save();
+
+		const commentAuthor = post.comments[commentIndex].user;
+		if (commentAuthor.toString() !== req.user._id.toString()) {
+			await Notification.create({
+				recipient: commentAuthor,
+				sender: req.user._id,
+				type: "reply",
+				post: post._id,
+				comment: post.comments[commentIndex]._id,
+			});
+		}
 
 		post = await populatePostFields(Post.findById(post._id));
 
@@ -602,7 +629,7 @@ exports.incrementViews = async (req, res) => {
 		const post = await Post.findOneAndUpdate(
 			{
 				_id: req.params.id,
-				user: { $ne: req.user._id }  // Exclude own posts
+				user: { $ne: req.user._id }, // Exclude own posts
 			},
 			{ $inc: { views: 1 } },
 			{ new: true }
@@ -646,7 +673,7 @@ exports.batchIncrementViews = async (req, res) => {
 		const result = await Post.updateMany(
 			{
 				_id: { $in: postIds },
-				user: { $ne: req.user._id }  // Exclude own posts
+				user: { $ne: req.user._id }, // Exclude own posts
 			},
 			{ $inc: { views: 1 } }
 		);
@@ -658,7 +685,7 @@ exports.batchIncrementViews = async (req, res) => {
 		);
 
 		const updatedCounts = {};
-		updatedPosts.forEach(post => {
+		updatedPosts.forEach((post) => {
 			updatedCounts[post._id.toString()] = post.views;
 		});
 
