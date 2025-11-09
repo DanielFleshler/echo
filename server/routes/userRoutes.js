@@ -36,5 +36,6 @@ router.patch(
 router.delete("/delete-profile-picture", userController.deleteProfilePicture);
 router.patch("/updateProfileInfo", userController.updateProfileInfo);
 router.patch("/updateMe", userController.updateMe);
+router.delete("/delete-account", userController.deleteAccount);
 
 module.exports = router;

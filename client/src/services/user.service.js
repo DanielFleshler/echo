@@ -87,6 +87,19 @@ const UserService = {
 			throw new Error(errorMessage);
 		}
 	},
+
+	deleteAccount: async (password) => {
+		try {
+			const response = await api.delete(`${USER_URL}/delete-account`, {
+				data: { password },
+			});
+			return response.data;
+		} catch (error) {
+			console.error("Delete account error:", error);
+			const errorMessage = error.response?.data?.message || "Failed to delete account.";
+			throw new Error(errorMessage);
+		}
+	},
 };
 
 export default UserService;

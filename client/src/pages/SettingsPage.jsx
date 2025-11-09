@@ -1,4 +1,5 @@
 import {
+	AlertTriangle,
 	ArrowLeft,
 	Eye,
 	Lock,
@@ -16,9 +17,10 @@ import UserService from "../services/user.service";
 import { useForm } from "../hooks/useForm";
 import LoadingSpinner from "../components/UI/LoadingSpinner";
 import ErrorMessage from "../components/UI/ErrorMessage";
+import DeleteAccountModal from "../components/UI/DeleteAccountModal";
 
 export default function SettingsPage() {
-	const { user, updateUser, loading: authLoading } = useAuth();
+	const { user, updateUser, logout, loading: authLoading } = useAuth();
 	const fileInputRef = useRef(null);
 	const { showSuccess, showError } = useToast();
 
@@ -29,6 +31,7 @@ export default function SettingsPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [profilePreview, setProfilePreview] = useState(null);
 	const [profileFile, setProfileFile] = useState(null);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
 	// --- Profile Form with useForm ---
 	const profileForm = useForm({
@@ -213,6 +216,20 @@ export default function SettingsPage() {
 		}
 	};
 
+	const handleDeleteAccount = async (password) => {
+		try {
+			await UserService.deleteAccount(password);
+			showSuccess("Account deleted successfully. Logging out...");
+			// Wait a moment before logout so user sees the success message
+			setTimeout(async () => {
+				await logout();
+			}, 1500);
+		} catch (err) {
+			console.error("Account deletion error:", err);
+			throw err; // Let modal handle the error display
+		}
+	};
+
 	// Loading state for the entire page (auth and initial profile fetch)
 	if (authLoading || initialLoading) {
 		return (
@@ -307,6 +324,16 @@ export default function SettingsPage() {
 							}`}
 						>
 							Password
+						</button>
+						<button
+							onClick={() => setActiveTab("danger")}
+							className={`rounded-full px-4 py-2 text-sm font-medium ${
+								activeTab === "danger"
+									? "bg-red-600 text-white"
+									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
+							}`}
+						>
+							Danger Zone
 						</button>
 					</div>
 
@@ -506,8 +533,65 @@ export default function SettingsPage() {
 							</button>
 						</form>
 					)}
+
+					{/* Danger Zone Section */}
+					{activeTab === "danger" && (
+						<div className="space-y-6">
+							<div className="rounded-lg border border-red-900/50 bg-gray-900 p-6">
+								<div className="flex items-start gap-4">
+									<div className="rounded-full bg-red-900/20 p-3">
+										<AlertTriangle className="h-6 w-6 text-red-500" />
+									</div>
+									<div className="flex-1">
+										<h2 className="text-xl font-semibold text-white mb-2">
+											Delete Account
+										</h2>
+										<p className="text-sm text-gray-300 mb-4">
+											Once you delete your account, there is no going back. This action is permanent and cannot be undone.
+										</p>
+										<div className="rounded-lg bg-red-900/10 border border-red-900/30 p-4 mb-4">
+											<p className="text-sm font-medium text-white mb-2">
+												What happens when you delete your account:
+											</p>
+											<ul className="space-y-1 text-sm text-gray-400">
+												<li className="flex items-start gap-2">
+													<span className="text-red-500">•</span>
+													<span>Your account will be permanently deleted</span>
+												</li>
+												<li className="flex items-start gap-2">
+													<span className="text-red-500">•</span>
+													<span>All your personal information will be removed</span>
+												</li>
+												<li className="flex items-start gap-2">
+													<span className="text-red-500">•</span>
+													<span>Your posts and comments will remain but show as "Deleted User"</span>
+												</li>
+												<li className="flex items-start gap-2">
+													<span className="text-red-500">•</span>
+													<span>You will not be able to recover your account</span>
+												</li>
+											</ul>
+										</div>
+										<button
+											onClick={() => setIsDeleteModalOpen(true)}
+											className="rounded-lg bg-red-600 px-5 py-2.5 font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20"
+										>
+											Delete My Account
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
 			</main>
+
+			{/* Delete Account Modal */}
+			<DeleteAccountModal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				onConfirm={handleDeleteAccount}
+			/>
 		</div>
 	);
 }
