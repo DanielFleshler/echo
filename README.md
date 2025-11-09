@@ -586,23 +586,14 @@ echo/
 
 ### Signup & Verification Flow
 
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=Signup+Page)
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=Email+Verification)
-
-### Post Creation & Management
-
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=Create+Post+Modal)
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=Edit+Post)
-
-### User Interactions
-
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=Followers+Modal)
-![Screenshot Placeholder](https://via.placeholder.com/800x500/1a1a2e/16213e?text=User+Feed)
+<img width="599" height="832" alt="Image" src="https://github.com/user-attachments/assets/48ea72d5-866f-4d4f-b999-df1fc9c66c3c" />
+<img width="603" height="1128" alt="Image" src="https://github.com/user-attachments/assets/356f695e-b2b7-42b9-b85b-4f6bc85123f7" />
+<img width="599" height="831" alt="Image" src="https://github.com/user-attachments/assets/f966ffc7-a5a6-4152-aa5e-c6c7fad8cac1" />
 
 ### Email Templates
 
-![Screenshot Placeholder](https://via.placeholder.com/600x400/1a1a2e/16213e?text=OTP+Email+Template)
-![Screenshot Placeholder](https://via.placeholder.com/600x400/1a1a2e/16213e?text=Password+Reset+Email)
+<img width="599" height="995" alt="Image" src="https://github.com/user-attachments/assets/cea2c620-78e4-4cf9-b212-5be8ed7b106e" />
+<img width="603" height="1128" alt="Image" src="https://github.com/user-attachments/assets/a1ac76ab-d937-4ce4-a3bb-c622797d3c3b" />
 
 </details>
 
