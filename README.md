@@ -163,33 +163,6 @@ Discover popular content with intelligent view tracking and trending calculation
 <tr>
 <td width="50%">
 
-### 🔍 Live Search System
-
-Instant user search with debounced API calls and smart result filtering.
-
-**Technical Implementation:**
-
-- MongoDB regex search on username/fullName
-- 300ms debouncing with useEffect cleanup
-- Search-as-you-type with 2-character minimum
-- Result limit of 7 users for performance
-- Backend filtering for scalability
-
-</td>
-<td width="50%">
-
-<img width="625" height="400" alt="Search Feature" src="https://via.placeholder.com/625x400/1a1a2e/9333ea?text=Search+Users" />
-
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-
-<img width="625" height="400" alt="Notifications" src="https://via.placeholder.com/625x400/1a1a2e/9333ea?text=Notifications" />
-
-</td>
-<td width="50%">
 
 
 ## 🛠️ Technical Stack
