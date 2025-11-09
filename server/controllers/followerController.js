@@ -1,5 +1,6 @@
 const Follower = require("../models/followerModel");
 const User = require("../models/userModel");
+const Notification = require("../models/notificationModel");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 
 exports.followUser = async (req, res) => {
@@ -27,6 +28,12 @@ exports.followUser = async (req, res) => {
 		const newFollower = await Follower.create({
 			follower: req.user._id,
 			following: userId,
+		});
+
+		await Notification.create({
+			recipient: userId,
+			sender: req.user._id,
+			type: "follow",
 		});
 
 		return sendSuccess(res, 201, "User followed successfully", {
