@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const postRouter = require("./routes/postRoutes");
 const followerRouter = require("./routes/followerRoutes");
+const notificationRouter = require("./routes/notificationRoutes");
 
 dotenv.config();
 
@@ -37,5 +38,6 @@ app.get("/", (req, res) => {
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/followers", followerRouter);
+app.use("/api/v1/notifications", notificationRouter);
 
 module.exports = app;
