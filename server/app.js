@@ -10,6 +10,7 @@ const userRouter = require("./routes/userRoutes");
 const postRouter = require("./routes/postRoutes");
 const followerRouter = require("./routes/followerRoutes");
 const notificationRouter = require("./routes/notificationRoutes");
+const roomRouter = require("./routes/roomRoutes");
 
 dotenv.config();
 
@@ -39,5 +40,6 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/followers", followerRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/rooms", roomRouter);
 
 module.exports = app;
