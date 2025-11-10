@@ -2,11 +2,12 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
-
+const http = require("http");
 
 dotenv.config({ path: "./.env" });
 
 const app = require("./app");
+const setupRoomHandlers = require("./sockets/roomSocketHandlers");
 
 const DB = process.env.DATABASE.replace(
 	"<PASSWORD>",
@@ -28,7 +29,18 @@ if (!fs.existsSync(uploadDir)) {
 }
 const port = process.env.PORT || 8000;
 
-const server = app.listen(port, () => {
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+	cors: {
+		origin: process.env.FRONTEND_URL || "http://localhost:5173",
+		methods: ["GET", "POST"],
+		credentials: true,
+	},
+});
+setupRoomHandlers(io);
+
+server.listen(port, () => {
 	console.log(`App running on port ${port} in ${process.env.NODE_ENV} mode...`);
 });
 
