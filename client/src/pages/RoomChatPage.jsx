@@ -1,48 +1,92 @@
 import { Shield } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ChatInput from "../components/chat/ChatInput";
 import ChatMessage from "../components/chat/ChatMessage";
 import RoomHeader from "../components/chat/RoomHeader";
-import { getRoomById, mockMessages } from "../data/roomsData";
-import { generateAnonymousId } from "../utils/anonymousUtils";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import roomService from "../services/room.service";
+import {
+	connectSocket,
+	disconnectSocket,
+	joinRoom,
+	leaveRoom,
+	offEvent,
+	onEvent,
+	sendMessage,
+} from "../services/roomSocket.service";
 
 export default function RoomChatPage() {
 	const { roomId } = useParams();
+	const { user } = useAuth();
 	const navigate = useNavigate();
+	const toast = useToast();
 	const [room, setRoom] = useState(null);
-	const [messages, setMessages] = useState(mockMessages);
+	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
-	const [currentUserAnonymousId] = useState(() => generateAnonymousId());
+	const [currentUserAnonymousId, setCurrentUserAnonymousId] = useState(null);
 
 	useEffect(() => {
-		// Load room data
-		const roomData = getRoomById(roomId);
-		if (!roomData) {
-			navigate("/rooms");
+		const userId = user.userId;
+		if (!userId) {
+			navigate("/login");
 			return;
 		}
-		setRoom(roomData);
-	}, [roomId, navigate]);
+		const socket = connectSocket();
+		socket.connect();
+
+		joinRoom(roomId, userId);
+		onEvent("joinedRoom", (data) => {
+			const anonymousId = data.anonymousId;
+			setCurrentUserAnonymousId(anonymousId);
+		});
+
+		onEvent("newMessage", (message) => {
+			setMessages((prev) => [...prev, message]);
+		});
+
+		onEvent("error", (error) => {
+			toast.showError(error.message || "An error occurred");
+		});
+
+		roomService
+			.getRoomById(roomId)
+			.then((res) => {
+				setRoom(res.data.room);
+			})
+			.catch((err) => {
+				toast.showError(err.message);
+			});
+
+		const fetchMessages = async () => {
+			try {
+				const res = await roomService.getRoomMessages(roomId, 1, 50);
+				setMessages(res.data.messages);
+			} catch (error) {
+				toast.showError(error.message);
+			}
+		};
+		fetchMessages();
+
+		return () => {
+			leaveRoom(roomId);
+			offEvent("joinedRoom");
+			offEvent("newMessage");
+			offEvent("error");
+		};
+	}, [roomId]);
 
 	useEffect(() => {
-		// Auto-scroll to bottom when new messages arrive
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
 
 	const handleSendMessage = async (content) => {
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 500));
-
-		const message = {
-			_id: `msg_${Date.now()}`,
-			content,
-			timestamp: new Date(),
-			anonymousId: currentUserAnonymousId,
-			isOwn: true,
-		};
-
-		setMessages((prev) => [...prev, message]);
+		try {
+			sendMessage(roomId, content);
+		} catch (error) {
+			toast.showError("Failed to send message");
+		}
 	};
 
 	if (!room) {
@@ -64,7 +108,8 @@ export default function RoomChatPage() {
 					<div className="flex items-center gap-2 text-sm text-blue-400">
 						<Shield className="h-4 w-4 flex-shrink-0" />
 						<span>
-							Your identity is anonymous. Messages will be deleted when this room resets.
+							Your identity is anonymous. Messages will be deleted when this
+							room resets.
 						</span>
 					</div>
 				</div>
@@ -88,4 +133,4 @@ export default function RoomChatPage() {
 			<ChatInput onSendMessage={handleSendMessage} />
 		</div>
 	);
-} 
+}

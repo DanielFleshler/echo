@@ -2,9 +2,9 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const { faker } = require("@faker-js/faker");
 
-const User = require("./models/userModel");
-const Post = require("./models/postModel");
-const Follower = require("./models/followerModel");
+const User = require("../models/userModel");
+const Post = require("../models/postModel");
+const Follower = require("../models/followerModel");
 
 // Constants
 const NUM_USERS = 200;

@@ -4,7 +4,7 @@ import CreateRoomModal from "../components/rooms/CreateRoomModal";
 import RoomDetailModal from "../components/rooms/RoomDetailModal";
 import RoomsList from "../components/rooms/RoomsList";
 import Card from "../components/UI/Card";
-import { mockRooms, categories, filterRoomsByCategory } from "../data/roomsData";
+import { categories, filterRoomsByCategory } from "../data/roomsData";
 
 export default function RoomsPage() {
 	const [selectedCategory, setSelectedCategory] = useState("All");
@@ -12,7 +12,7 @@ export default function RoomsPage() {
 	const [selectedRoom, setSelectedRoom] = useState(null);
 
 	// Filter rooms based on current category selection
-	const filteredRooms = filterRoomsByCategory(mockRooms, selectedCategory);
+	const filteredRooms = filterRoomsByCategory(selectedCategory);
 
 	return (
 		<div className="flex flex-col bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen">
@@ -122,10 +122,7 @@ export default function RoomsPage() {
 					</div>
 
 					{/* Rooms List */}
-					<RoomsList
-						rooms={filteredRooms}
-						onRoomClick={setSelectedRoom}
-					/>
+					<RoomsList rooms={filteredRooms} onRoomClick={setSelectedRoom} />
 
 					{/* Empty State */}
 					{filteredRooms.length === 0 && (
