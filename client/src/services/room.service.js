@@ -1,8 +1,19 @@
 import api from "./api";
 
-const ROOMS_URL = "/api/v1/rooms";
+const ROOMS_URL = "/rooms";
 
 const roomService = {
+	getAllRooms: async () => {
+		try {
+			const response = await api.get(ROOMS_URL);
+			return response.data;
+		} catch (error) {
+			console.error("Get all rooms error:", error);
+			const errorMessage =
+				error.response?.data?.message || "Failed to fetch rooms.";
+			throw new Error(errorMessage);
+		}
+	},
 	getRoomById: async (id) => {
 		try {
 			const response = await api.get(`${ROOMS_URL}/${id}`);
