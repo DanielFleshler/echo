@@ -1,18 +1,47 @@
 import { Clock, Filter, Plus, Search, Star, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateRoomModal from "../components/rooms/CreateRoomModal";
 import RoomDetailModal from "../components/rooms/RoomDetailModal";
 import RoomsList from "../components/rooms/RoomsList";
 import Card from "../components/UI/Card";
-import { categories, filterRoomsByCategory } from "../data/roomsData";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import { useToast } from "../context/ToastContext";
+import { categories } from "../data/roomsData";
+import roomService from "../services/room.service";
 
 export default function RoomsPage() {
 	const [selectedCategory, setSelectedCategory] = useState("All");
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [selectedRoom, setSelectedRoom] = useState(null);
+	const [rooms, setRooms] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const toast = useToast();
 
-	// Filter rooms based on current category selection
-	const filteredRooms = filterRoomsByCategory(selectedCategory);
+	useEffect(() => {
+		const fetchRooms = async () => {
+			try {
+				setLoading(true);
+				const response = await roomService.getAllRooms();
+				setRooms(response.data.rooms);
+			} catch (error) {
+				toast.showError(error.message);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchRooms();
+	}, []);
+	const filteredRooms =
+		selectedCategory === "All"
+			? rooms
+			: rooms.filter((room) => room.category === selectedCategory);
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<LoadingSpinner />
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex flex-col bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen">
@@ -71,7 +100,7 @@ export default function RoomsPage() {
 								<div>
 									<p className="text-sm text-gray-400">Total Rooms</p>
 									<p className="text-2xl font-bold text-white">
-										{mockRooms.length}
+										{rooms.length}
 									</p>
 								</div>
 							</div>
@@ -86,7 +115,7 @@ export default function RoomsPage() {
 									<p className="text-sm text-gray-400">Official Rooms</p>
 									<p className="text-2xl font-bold text-white">
 										{
-											mockRooms.filter((room) => room.roomType === "official")
+											rooms.filter((room) => room.roomType === "official")
 												.length
 										}
 									</p>
@@ -102,8 +131,8 @@ export default function RoomsPage() {
 								<div>
 									<p className="text-sm text-gray-400">Active Participants</p>
 									<p className="text-2xl font-bold text-white">
-										{mockRooms.reduce(
-											(sum, room) => sum + room.participantCount,
+										{rooms.reduce(
+											(total, room) => total + room.participantCount,
 											0
 										)}
 									</p>
