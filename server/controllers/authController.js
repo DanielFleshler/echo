@@ -21,7 +21,7 @@ const sendToken = async (user, statusCode, res) => {
 		),
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "strict",
+		sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 	};
 
 	const refreshCookieOptions = {
@@ -31,7 +31,7 @@ const sendToken = async (user, statusCode, res) => {
 		),
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "strict",
+		sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 		path: "/api/v1/users/refresh-token", // Only send refresh token to refresh endpoint
 	};
 
@@ -160,7 +160,8 @@ exports.logout = (req, res) => {
 		expires: new Date(0),
 		httpOnly: true,
 		path: "/",
-		sameSite: "strict",
+		sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+		secure: process.env.NODE_ENV === "production",
 	};
 	res.clearCookie("jwt", cookieOptions);
 
@@ -395,7 +396,7 @@ exports.refreshToken = async (req, res) => {
 			),
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
-			sameSite: "strict",
+			sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 		};
 
 		const refreshCookieOptions = {
@@ -405,7 +406,7 @@ exports.refreshToken = async (req, res) => {
 			),
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
-			sameSite: "strict",
+			sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 			path: "/api/v1/users/refresh-token",
 		};
 
