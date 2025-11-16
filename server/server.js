@@ -29,13 +29,22 @@ const DB = process.env.DATABASE.replace(
 	process.env.DATABASE_PASSWORD
 );
 
+// Log connection attempt (without password)
+logger.info(`Attempting to connect to MongoDB...`);
+logger.info(`DATABASE env exists: ${!!process.env.DATABASE}`);
+logger.info(`DATABASE_PASSWORD env exists: ${!!process.env.DATABASE_PASSWORD}`);
+
 mongoose
-	.connect(DB)
+	.connect(DB, {
+		serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+		socketTimeoutMS: 45000,
+	})
 	.then(() => {
 		logger.info("DB connection successful!");
 	})
 	.catch((err) => {
 		logger.error("Error connecting to database:", err);
+		logger.error("MongoDB connection failed. Check your DATABASE and DATABASE_PASSWORD environment variables.");
 	});
 
 const uploadDir = path.join(__dirname, "tmp", "uploads");
