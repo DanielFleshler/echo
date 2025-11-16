@@ -127,15 +127,16 @@ export default function RoomChatPage() {
 		});
 
 		roomService
-
 			.getRoomById(roomId)
-
 			.then((res) => {
 				setRoom(res.data.room);
 			})
-
 			.catch((err) => {
-				toast.showError(err.message);
+				toast.showError(err.message || "Room not found");
+				// Redirect to rooms page if room doesn't exist
+				setTimeout(() => {
+					navigate("/rooms");
+				}, 2000);
 			});
 
 		const fetchMessages = async () => {
