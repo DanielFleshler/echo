@@ -64,6 +64,15 @@ app.get("/", (req, res) => {
 	});
 });
 
+// Health check endpoint for uptime monitoring (no rate limiting)
+app.get("/health", (req, res) => {
+	res.status(200).json({
+		status: "ok",
+		timestamp: new Date().toISOString(),
+		uptime: process.uptime(),
+	});
+});
+
 // Apply general rate limiter to all /api routes (Express v5 compatible)
 app.use(/^\/api\/.*/, generalLimiter);
 
