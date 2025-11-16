@@ -53,10 +53,21 @@ exports.getRoomMessages = async (req, res) => {
 			.skip(skip)
 			.limit(limit);
 
+		const requestingUserId = req.user._id.toString();
+
+		// Add isOwn flag to each message
+		const messagesWithOwn = messages.map((msg) => ({
+			_id: msg._id,
+			content: msg.content,
+			anonymousId: msg.anonymousId,
+			timestamp: msg.createdAt,
+			isOwn: msg.userId.toString() === requestingUserId,
+		}));
+
 		const totalMessages = await RoomMessage.countDocuments({ roomId: roomId });
 		return sendSuccess(res, 200, "Messages retrieved successfully", {
 			data: {
-				messages,
+				messages: messagesWithOwn,
 				pagination: {
 					currentPage: page,
 					totalPages: Math.ceil(totalMessages / limit),
