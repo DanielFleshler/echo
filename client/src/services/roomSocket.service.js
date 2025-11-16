@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { API_CONFIG } from "../constants/config";
 
-const SOCKET_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
+const SOCKET_URL = API_CONFIG.SOCKET_URL;
 
 let socket = null;
 export const connectSocket = () => {
