@@ -40,15 +40,21 @@ const MessagesPage = () => {
 	};
 
 	return (
-		<div className="grid grid-cols-4 gap-8">
-			<MessageSidebar />
-			<div className="col-span-3 bg-gray-900/40 rounded-xl border border-gray-800/50 flex flex-col">
+		<div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 py-4">
+			{/* Message Sidebar - Full width on mobile, 1 col on desktop */}
+			<div className={`${activeConversation ? 'hidden lg:block' : 'block'}`}>
+				<MessageSidebar />
+			</div>
+
+			{/* Chat Area - Hidden on mobile if no conversation selected */}
+			<div className={`lg:col-span-3 bg-gray-900/40 rounded-xl border border-gray-800/50 flex flex-col min-h-[600px] ${!activeConversation ? 'hidden lg:flex' : 'flex'}`}>
 				{activeConversation && recipient ? (
 					<>
 						<div className="p-4 border-b border-gray-800 flex items-center gap-4">
 							<ProfileAvatar
 								profilePicture={recipient.profilePicture}
 								username={recipient.username}
+								size="md"
 							/>
 							<h2 className="font-bold text-lg text-white">
 								{recipient.username}
@@ -67,8 +73,8 @@ const MessagesPage = () => {
 						<ChatInputField onSend={handleSendMessage} />
 					</>
 				) : (
-					<div className="flex-1 flex items-center justify-center">
-						<p className="text-gray-500">
+					<div className="flex-1 flex items-center justify-center p-8">
+						<p className="text-gray-500 text-center">
 							Select a conversation to start chatting.
 						</p>
 					</div>

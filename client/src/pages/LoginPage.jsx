@@ -163,9 +163,8 @@ export default function LoginPage() {
 			</div>
 
 			{/* Right Column - Hero Image */}
-			<div className="flex-1 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
-				<div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=800')] opacity-10 bg-cover bg-center"></div>
-				<div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20"></div>
+			<div className="hidden lg:flex flex-1 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-purple-900/20"></div>
 				<div className="relative flex h-full flex-col items-center justify-center p-10 text-white">
 					<div className="max-w-md space-y-6">
 						<div className="space-y-2 text-center">

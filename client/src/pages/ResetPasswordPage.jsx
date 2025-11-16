@@ -10,10 +10,7 @@ export default function ResetPasswordPage() {
 	const { resetPassword, loading: authLoading } = useAuth();
 	const { token } = useParams();
 	const { showSuccess, showError } = useToast();
-	const [password, setPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
-	const [formError, setFormError] = useState("");
 
 	const form = useForm({
 		initialValues: {

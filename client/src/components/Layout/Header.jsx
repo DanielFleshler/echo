@@ -86,60 +86,65 @@ export default function Header() {
 	return (
 		<>
 			<header className="sticky top-0 z-20 border-b border-gray-800/20 bg-gray-950/80 backdrop-blur-xl shadow-lg shadow-black/10">
-				<div className="container flex h-16 items-center justify-between px-4">
+				<div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
 					{/* Logo */}
 					<div className="flex items-center gap-2">
 						<Link to="/" className="flex items-center gap-2 group">
-							<Sparkles className="h-6 w-6 text-purple-500 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-							<span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent transition-all duration-300 group-hover:from-purple-400 group-hover:to-blue-400">
+							<Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+							<span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent transition-all duration-300 group-hover:from-purple-400 group-hover:to-blue-400">
 								Echo
 							</span>
 						</Link>
 					</div>
 
-					{/* Desktop Navigation */}
-					<nav className="flex items-center gap-6">
+					{/* Navigation - Icons only on mobile, text on desktop */}
+					<nav className="flex items-center gap-2 sm:gap-4 lg:gap-6">
 						<Link
 							to="/"
-							className={`text-sm font-medium flex items-center gap-1.5 transition-all duration-200 ${
+							className={`flex items-center gap-1.5 transition-all duration-200 p-2 rounded-lg touch-manipulation ${
 								isActive("/")
-									? "text-purple-400"
-									: "text-gray-200 hover:text-purple-400"
+									? "text-purple-400 bg-purple-500/10"
+									: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
 							}`}
+							aria-label="Feed"
 						>
-							<Home className="h-4 w-4" />
-							Feed
+							<Home className="h-5 w-5 sm:h-4 sm:w-4" />
+							<span className="hidden md:inline text-sm font-medium">Feed</span>
 						</Link>
 						<Link
 							to="/rooms"
-							className={`text-sm font-medium flex items-center gap-1.5 transition-all duration-200 ${
+							className={`flex items-center gap-1.5 transition-all duration-200 p-2 rounded-lg touch-manipulation ${
 								isActive("/rooms")
-									? "text-purple-400"
-									: "text-gray-200 hover:text-purple-400"
+									? "text-purple-400 bg-purple-500/10"
+									: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
 							}`}
+							aria-label="Rooms"
 						>
-							<Users className="h-4 w-4" />
-							Rooms
+							<Users className="h-5 w-5 sm:h-4 sm:w-4" />
+							<span className="hidden md:inline text-sm font-medium">Rooms</span>
 						</Link>
 						<button
 							ref={searchButtonRef}
 							onClick={handleOpenSearch}
-							className="text-sm font-medium text-gray-200 hover:text-purple-400 flex items-center gap-1.5 cursor-pointer transition-all duration-200"
+							className="flex items-center gap-1.5 text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 p-2 rounded-lg touch-manipulation"
+							aria-label="Search users and posts"
 						>
-							<Search className="h-4 w-4" />
-							Search
+							<Search className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />
+							<span className="hidden md:inline text-sm font-medium">Search</span>
 						</button>
 						<button
 							ref={notificationsButtonRef}
 							onClick={handleToggleNotifications}
-							className="text-sm font-medium text-gray-200 hover:text-purple-400 flex items-center gap-1.5 cursor-pointer transition-all duration-200 relative"
+							className="flex items-center gap-1.5 text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 p-2 rounded-lg relative touch-manipulation"
+							aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+							aria-expanded={showNotifications}
 						>
-							<Bell className="h-4 w-4" />
-							Notifications
+							<Bell className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />
+							<span className="hidden md:inline text-sm font-medium">Notifications</span>
 							{unreadCount > 0 && (
 								<span
-									className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full 
-  bg-purple-500 text-[10px] font-bold text-white"
+									className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 text-[10px] font-bold text-white"
+									aria-label={`${unreadCount} unread notifications`}
 								>
 									{unreadCount > 9 ? "9+" : unreadCount}
 								</span>

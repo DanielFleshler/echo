@@ -32,27 +32,33 @@ export default function HomePage() {
 
 	return (
 		<div className="flex flex-col">
-			<main className="flex-1 py-8">
-				<div className="container grid grid-cols-4 gap-8 px-4">
-					{/* Message Sidebar */}
-					<MessageSidebar />
+			<main className="flex-1 py-4 sm:py-6 lg:py-8">
+				<div className="container grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4">
+					{/* Message Sidebar - Hidden on mobile, shown on large screens */}
+					<div className="hidden lg:block">
+						<MessageSidebar />
+					</div>
 
-					{/* Post Feed */}
-					<PostFeed
-						user={user}
-						posts={posts}
-						loadingPosts={loadingPosts}
-						hasMore={hasMore}
-						loadMorePosts={loadMorePosts}
-						createPost={createPost}
-					/>
+					{/* Post Feed - Full width on mobile, 2 cols on desktop */}
+					<div className="lg:col-span-2">
+						<PostFeed
+							user={user}
+							posts={posts}
+							loadingPosts={loadingPosts}
+							hasMore={hasMore}
+							loadMorePosts={loadMorePosts}
+							createPost={createPost}
+						/>
+					</div>
 
-					{/* Trending Sidebar */}
-					<TrendingSidebar
-						trendingPosts={trendingPosts}
-						loadingTrending={loadingTrending}
-						getHoursLeft={getHoursLeft}
-					/>
+					{/* Trending Sidebar - Hidden on mobile, shown on large screens */}
+					<div className="hidden lg:block">
+						<TrendingSidebar
+							trendingPosts={trendingPosts}
+							loadingTrending={loadingTrending}
+							getHoursLeft={getHoursLeft}
+						/>
+					</div>
 				</div>
 			</main>
 
