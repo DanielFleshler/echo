@@ -44,7 +44,9 @@ mongoose
 	})
 	.catch((err) => {
 		logger.error("Error connecting to database:", err);
-		logger.error("MongoDB connection failed. Check your DATABASE and DATABASE_PASSWORD environment variables.");
+		logger.error(
+			"MongoDB connection failed. Check your DATABASE and DATABASE_PASSWORD environment variables."
+		);
 	});
 
 const uploadDir = path.join(__dirname, "tmp", "uploads");
@@ -59,8 +61,8 @@ const io = new Server(server, {
 	cors: {
 		origin: [
 			process.env.FRONTEND_URL || "http://localhost:5173",
-			"http://localhost:5173",
-			"https://echo-lxld.onrender.com"
+			"https://echo-lxld.onrender.com",
+			"https://echo-server-p42j.onrender.com",
 		],
 		methods: ["GET", "POST"],
 		credentials: true,
@@ -98,7 +100,9 @@ io.use(async (socket, next) => {
 		}
 
 		socket.user = freshUser;
-		logger.info(`Socket authenticated successfully for user: ${freshUser.username} (${freshUser._id})`);
+		logger.info(
+			`Socket authenticated successfully for user: ${freshUser.username} (${freshUser._id})`
+		);
 		next();
 	} catch (err) {
 		logger.error(`Socket authentication error: ${err.message}`);
