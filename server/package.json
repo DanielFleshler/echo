@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "start",
-    "start": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "seed": "node seedDatabase.js",
     "seed:clean": "node cleanDB.js"
   },
