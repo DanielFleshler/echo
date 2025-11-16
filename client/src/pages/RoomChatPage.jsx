@@ -9,7 +9,6 @@ import { useToast } from "../context/ToastContext";
 import roomService from "../services/room.service";
 import {
 	connectSocket,
-	disconnectSocket,
 	joinRoom,
 	leaveRoom,
 	offEvent,
@@ -26,61 +25,67 @@ export default function RoomChatPage() {
 	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
 	const [currentUserAnonymousId, setCurrentUserAnonymousId] = useState(null);
-	const currentUserAnonymousIdRef = useRef(null); // Use ref to avoid closure issues
+	const currentUserAnonymousIdRef = useRef(null);
+	const [messagePage, setMessagePage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const messagesContainerRef = useRef(null);
 
-	// Update ref and isOwn flag when currentUserAnonymousId changes
 	useEffect(() => {
 		currentUserAnonymousIdRef.current = currentUserAnonymousId;
-		if (currentUserAnonymousId) {
-			setMessages((prev) =>
-				prev.map((msg) => ({
-					...msg,
-					isOwn: msg.anonymousId === currentUserAnonymousId,
-				}))
-			);
-		}
 	}, [currentUserAnonymousId]);
 
 	useEffect(() => {
 		const userId = user._id;
+
 		if (!userId) {
 			navigate("/login");
+
 			return;
 		}
+
 		const socket = connectSocket();
+
 		socket.connect();
 
-		joinRoom(roomId, userId);
+		joinRoom(roomId);
+
 		onEvent("joinedRoom", (data) => {
 			const anonymousId = data.anonymousId;
+
 			setCurrentUserAnonymousId(anonymousId);
 		});
 
 		onEvent("newMessage", (message) => {
-			setMessages((prev) => [
-				...prev,
-				{
-					...message,
-					isOwn: message.anonymousId === currentUserAnonymousIdRef.current,
-				},
-			]);
+			setMessages((prev) => [...prev, message]);
 		});
 
 		onEvent("userJoined", (data) => {
 			// Update participant count in real-time
-			setRoom((prev) => prev ? ({
-				...prev,
-				participantCount: data.participantCount,
-			}) : prev);
+
+			setRoom((prev) =>
+				prev
+					? {
+							...prev,
+
+							participantCount: data.participantCount,
+					  }
+					: prev
+			);
 
 			// Only show join message for OTHER users, not yourself
+
 			if (data.anonymousId !== currentUserAnonymousIdRef.current) {
 				setMessages((prev) => [
 					...prev,
+
 					{
 						_id: `system-${Date.now()}-${Math.random()}`,
+
 						type: "system",
+
 						content: `${data.anonymousId} joined the room`,
+
 						timestamp: new Date(),
 					},
 				]);
@@ -89,20 +94,32 @@ export default function RoomChatPage() {
 
 		onEvent("userLeft", (data) => {
 			// Add system message for user leave
+
 			setMessages((prev) => [
 				...prev,
+
 				{
 					_id: `system-${Date.now()}-${Math.random()}`,
+
 					type: "system",
+
 					content: `${data.anonymousId} left the room`,
+
 					timestamp: new Date(),
 				},
 			]);
+
 			// Update participant count in real-time
-			setRoom((prev) => prev ? ({
-				...prev,
-				participantCount: data.participantCount,
-			}) : prev);
+
+			setRoom((prev) =>
+				prev
+					? {
+							...prev,
+
+							participantCount: data.participantCount,
+					  }
+					: prev
+			);
 		});
 
 		onEvent("error", (error) => {
@@ -110,10 +127,13 @@ export default function RoomChatPage() {
 		});
 
 		roomService
+
 			.getRoomById(roomId)
+
 			.then((res) => {
 				setRoom(res.data.room);
 			})
+
 			.catch((err) => {
 				toast.showError(err.message);
 			});
@@ -121,12 +141,10 @@ export default function RoomChatPage() {
 		const fetchMessages = async () => {
 			try {
 				const res = await roomService.getRoomMessages(roomId, 1, 50);
-				// Mark messages as isOwn after we have the anonymousId
-				const messagesWithOwn = res.data.messages.map((msg) => ({
-					...msg,
-					isOwn: false, // Will be updated once we get currentUserAnonymousId
-				}));
-				setMessages(messagesWithOwn);
+
+				setMessages(res.data.messages);
+				setTotalPages(res.data.pagination.totalPages);
+				setMessagePage(1);
 			} catch (error) {
 				toast.showError(error.message);
 			}
@@ -152,6 +170,39 @@ export default function RoomChatPage() {
 			sendMessage(roomId, content);
 		} catch (error) {
 			toast.showError("Failed to send message");
+		}
+	};
+
+	const fetchMoreMessages = async () => {
+		if (loadingMore || messagePage >= totalPages) return;
+
+		setLoadingMore(true);
+		try {
+			const nextPage = messagePage + 1;
+			const res = await roomService.getRoomMessages(roomId, nextPage, 50);
+
+			const messageContainer = messagesContainerRef.current;
+			const oldScrollHeight = messageContainer.scrollHeight;
+
+			setMessages((prev) => [...res.data.messages, ...prev]);
+			setTotalPages(res.data.pagination.totalPages);
+			setMessagePage(nextPage);
+
+			// Restore scroll position
+			requestAnimationFrame(() => {
+				messageContainer.scrollTop =
+					messageContainer.scrollHeight - oldScrollHeight;
+			});
+		} catch (error) {
+			toast.showError(error.message);
+		} finally {
+			setLoadingMore(false);
+		}
+	};
+
+	const handleScroll = (e) => {
+		if (e.target.scrollTop === 0) {
+			fetchMoreMessages();
 		}
 	};
 
@@ -183,8 +234,17 @@ export default function RoomChatPage() {
 
 			{/* Messages Area */}
 			<div className="flex-1 overflow-hidden">
-				<div className="h-full overflow-y-auto">
+				<div
+					ref={messagesContainerRef}
+					onScroll={handleScroll}
+					className="h-full overflow-y-auto"
+				>
 					<div className="container max-w-4xl mx-auto px-4 py-6">
+						{loadingMore && (
+							<div className="flex justify-center my-4">
+								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+							</div>
+						)}
 						{messages.length === 0 ? (
 							<div className="flex flex-col items-center justify-center h-full text-center">
 								<div className="mb-4 p-6 rounded-full bg-gray-800/50">
@@ -195,7 +255,8 @@ export default function RoomChatPage() {
 								</h3>
 								<p className="text-gray-400 max-w-md">
 									Be the first to share your thoughts in this anonymous space.
-									Your identity is protected and messages will reset periodically.
+									Your identity is protected and messages will reset
+									periodically.
 								</p>
 							</div>
 						) : (

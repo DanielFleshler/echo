@@ -6,6 +6,7 @@ const User = require("../models/userModel");
 const resetPasswordMessage = require("../utils/email/templates/passwordReset");
 const otpEmailTemplate = require("../utils/email/templates/otpEmail");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
+const logger = require("../utils/logger");
 
 const sendToken = async (user, statusCode, res) => {
 	const token = user.generateAuthToken();
@@ -81,7 +82,7 @@ exports.login = async (req, res) => {
 
 		return sendToken(user, 200, res);
 	} catch (error) {
-		console.error("Login error:", error);
+		logger.error(`Login error: ${error.message}`);
 		return sendError(res, 500, "An error occurred during login");
 	}
 };
@@ -137,7 +138,7 @@ exports.signup = async (req, res) => {
 				}
 			);
 		} catch (emailError) {
-			console.error("Failed to send verification email:", emailError);
+			logger.error(`Failed to send verification email: ${emailError.message}`);
 			return sendSuccess(
 				res,
 				201,
@@ -149,6 +150,7 @@ exports.signup = async (req, res) => {
 			);
 		}
 	} catch (err) {
+		logger.error(`Signup error: ${err.message}`);
 		return sendError(res, 400, err.message);
 	}
 };
@@ -196,7 +198,7 @@ exports.forgotPassword = async (req, res) => {
 		user.passwordResetToken = undefined;
 		user.passwordResetExpires = undefined;
 		await user.save({ validateBeforeSave: false });
-
+		logger.error(`Error sending password reset email: ${error.message}`);
 		return sendError(
 			res,
 			500,
@@ -249,6 +251,7 @@ exports.resetPassword = async (req, res) => {
 
 		return sendToken(user, 200, res);
 	} catch (err) {
+		logger.error(`Error resetting password: ${err.message}`);
 		return sendError(res, 500, err.message);
 	}
 };
@@ -296,6 +299,7 @@ exports.protect = async (req, res, next) => {
 		res.locals.user = freshUser;
 		next();
 	} catch (err) {
+		logger.warn(`Authentication error in protect middleware: ${err.message}`);
 		return sendError(res, 401, "Invalid token or token expired");
 	}
 };
@@ -317,6 +321,7 @@ exports.requireVerification = async (req, res, next) => {
 
 		next();
 	} catch (err) {
+		logger.error(`Error checking verification status: ${err.message}`);
 		return sendError(res, 500, "Error checking verification status");
 	}
 };
@@ -418,8 +423,7 @@ exports.refreshToken = async (req, res) => {
 			data: { user },
 		});
 	} catch (error) {
-		console.error("❌ Refresh token error:", error);
-		console.error("Error stack:", error.stack);
+		logger.error(`Refresh token error: ${error.message}`);
 		return sendError(res, 500, "An error occurred during token refresh");
 	}
 };

@@ -10,14 +10,15 @@ export const connectSocket = () => {
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionAttempts: 5,
+			withCredentials: true,
 		});
 	}
 	return socket;
 };
 
-export const joinRoom = (roomId, userId) => {
+export const joinRoom = (roomId) => {
 	if (!socket) return;
-	socket.emit("joinRoom", { roomId, userId });
+	socket.emit("joinRoom", { roomId });
 };
 
 export const sendMessage = (roomId, content) => {

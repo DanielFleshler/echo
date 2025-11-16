@@ -1,6 +1,7 @@
 const Room = require("../models/roomModel");
 const RoomMessage = require("../models/roomMessageModel");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
+const logger = require("../utils/logger");
 
 exports.getAllRooms = async (req, res) => {
 	try {
@@ -17,7 +18,7 @@ exports.getAllRooms = async (req, res) => {
 			data: { rooms, count: rooms.length },
 		});
 	} catch (error) {
-		console.error("Error fetching rooms:", error);
+		logger.error(`Error fetching rooms: ${error.message}`);
 		return sendError(res, 500, "Failed to fetch rooms");
 	}
 };
@@ -32,6 +33,7 @@ exports.getRoomById = async (req, res) => {
 			data: { room },
 		});
 	} catch (error) {
+		logger.error(`Error fetching room by id: ${error.message}`);
 		return sendError(res, 500, "Failed to fetch room");
 	}
 };
@@ -77,7 +79,7 @@ exports.getRoomMessages = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error fetching messages:", error);
+		logger.error(`Error fetching messages: ${error.message}`);
 		return sendError(res, 500, "Failed to fetch messages");
 	}
 };
@@ -108,6 +110,7 @@ exports.createRoom = async (req, res) => {
 			},
 		});
 	} catch (error) {
+		logger.error(`Error creating room: ${error.message}`);
 		return sendError(res, 500, "Failed to create room");
 	}
 };
@@ -142,7 +145,7 @@ exports.updateRoom = async (req, res) => {
 			data: { room },
 		});
 	} catch (error) {
-		console.error("Error updating room:", error);
+		logger.error(`Error updating room: ${error.message}`);
 		return sendError(res, 500, "Failed to update room");
 	}
 };
@@ -165,6 +168,7 @@ exports.deleteRoom = async (req, res) => {
 		await RoomMessage.deleteMany({ roomId: roomId });
 		return sendSuccess(res, 200, "Room deleted successfully");
 	} catch (error) {
+		logger.error(`Error deleting room: ${error.message}`);
 		return sendError(res, 500, "Failed to delete room");
 	}
 };

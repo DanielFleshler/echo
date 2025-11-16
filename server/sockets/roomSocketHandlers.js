@@ -1,5 +1,6 @@
 const Room = require("../models/roomModel");
 const RoomMessage = require("../models/roomMessageModel");
+const logger = require("../utils/logger");
 
 const generateAnonymousId = () => {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -12,15 +13,17 @@ const generateAnonymousId = () => {
 
 const setupRoomHandlers = (io) => {
 	io.on("connection", (socket) => {
-		console.log("New client connected:", socket.id);
+		logger.info(`New client connected: ${socket.id}`);
 
-		socket.on("joinRoom", async ({ roomId, userId }) => {
+		socket.on("joinRoom", async ({ roomId }) => {
 			try {
 				const room = await Room.findById(roomId);
 				if (!room) {
 					socket.emit("error", { message: "Room not found" });
 					return;
 				}
+
+				const userId = socket.user._id;
 
 				// Check if user already in room (idempotent - safe to call multiple times)
 				let participant = room.activeParticipants.find(
@@ -33,7 +36,9 @@ const setupRoomHandlers = (io) => {
 				if (participant) {
 					// User already in room - just return current state
 					anonymousId = participant.anonymousId;
-					console.log(`User ${userId} already in room ${roomId} as ${anonymousId}`);
+					logger.info(
+						`User ${userId} already in room ${roomId} as ${anonymousId}`
+					);
 				} else {
 					// New join - get or create anonymous ID
 					isNewJoin = true;
@@ -64,14 +69,13 @@ const setupRoomHandlers = (io) => {
 					room.participantCount = room.activeParticipants.length;
 					await room.save();
 
-					console.log(`User ${userId} joined room ${roomId} as ${anonymousId}`);
+					logger.info(`User ${userId} joined room ${roomId} as ${anonymousId}`);
 				}
 
 				// Join Socket.IO room
 				socket.join(roomId);
 
 				// Store state on socket
-				socket.userId = userId;
 				socket.roomId = roomId;
 				socket.anonymousId = anonymousId;
 
@@ -91,14 +95,14 @@ const setupRoomHandlers = (io) => {
 					});
 				}
 			} catch (error) {
-				console.error("Error joining room:", error);
+				logger.error(`Error joining room: ${error.message}`);
 				socket.emit("error", { message: "Failed to join room" });
 			}
 		});
 
 		socket.on("sendMessage", async ({ roomId, content }) => {
 			try {
-				if (!socket.userId || !socket.anonymousId) {
+				if (!socket.user || !socket.anonymousId) {
 					socket.emit("error", { message: "You must join a room first" });
 					return;
 				}
@@ -116,7 +120,7 @@ const setupRoomHandlers = (io) => {
 				const message = await RoomMessage.create({
 					content: content.trim(),
 					roomId,
-					userId: socket.userId,
+					userId: socket.user._id,
 					anonymousId: socket.anonymousId,
 				});
 
@@ -133,16 +137,16 @@ const setupRoomHandlers = (io) => {
 				// Send to others with isOwn: false
 				socket.to(roomId).emit("newMessage", { ...messageData, isOwn: false });
 
-				console.log(`Message sent in room ${roomId} by ${socket.anonymousId}`);
+				logger.info(`Message sent in room ${roomId} by ${socket.anonymousId}`);
 			} catch (error) {
-				console.error("Error sending message:", error);
+				logger.error(`Error sending message: ${error.message}`);
 				socket.emit("error", { message: "Failed to send message" });
 			}
 		});
 
 		socket.on("leaveRoom", async (roomId) => {
 			try {
-				if (!socket.userId || !socket.roomId) {
+				if (!socket.user || !socket.roomId) {
 					// User not in any room, nothing to do
 					return;
 				}
@@ -155,7 +159,7 @@ const setupRoomHandlers = (io) => {
 				// Remove from active participants
 				const initialLength = room.activeParticipants.length;
 				room.activeParticipants = room.activeParticipants.filter(
-					(p) => p.userId.toString() !== socket.userId.toString()
+					(p) => p.userId.toString() !== socket.user._id.toString()
 				);
 
 				// Only update if we actually removed someone
@@ -169,31 +173,30 @@ const setupRoomHandlers = (io) => {
 						participantCount: room.participantCount,
 					});
 
-					console.log(`User ${socket.userId} left room ${roomId}`);
+					logger.info(`User ${socket.user._id} left room ${roomId}`);
 				}
 
 				// Leave Socket.IO room
 				socket.leave(roomId);
 
 				// Clear socket state
-				socket.userId = null;
 				socket.roomId = null;
 				socket.anonymousId = null;
 			} catch (error) {
-				console.error("Error leaving room:", error);
+				logger.error(`Error leaving room: ${error.message}`);
 				socket.emit("error", { message: "Failed to leave room" });
 			}
 		});
 
 		socket.on("disconnect", async () => {
 			try {
-				if (socket.roomId) {
+				if (socket.roomId && socket.user) {
 					// User disconnected while in a room - clean up
 					const room = await Room.findById(socket.roomId);
 					if (room) {
 						const initialLength = room.activeParticipants.length;
 						room.activeParticipants = room.activeParticipants.filter(
-							(p) => p.userId.toString() !== socket.userId.toString()
+							(p) => p.userId.toString() !== socket.user._id.toString()
 						);
 
 						if (room.activeParticipants.length < initialLength) {
@@ -206,13 +209,15 @@ const setupRoomHandlers = (io) => {
 								participantCount: room.participantCount,
 							});
 
-							console.log(`User ${socket.userId} disconnected from room ${socket.roomId}`);
+							logger.info(
+								`User ${socket.user._id} disconnected from room ${socket.roomId}`
+							);
 						}
 					}
 				}
-				console.log("Client disconnected:", socket.id);
+				logger.info(`Client disconnected: ${socket.id}`);
 			} catch (error) {
-				console.error("Error during disconnect:", error);
+				logger.error(`Error during disconnect: ${error.message}`);
 			}
 		});
 	});
