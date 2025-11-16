@@ -20,15 +20,17 @@ dotenv.config();
 const app = express();
 
 // Security middleware
-app.use(morgan("dev"));
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(helmet());
+
+// CORS - use environment variable for allowed origins
+const allowedOrigins = process.env.FRONTEND_URL
+	? process.env.FRONTEND_URL.split(',')
+	: ["http://localhost:5173"];
+
 app.use(
 	cors({
-		origin: [
-			process.env.FRONTEND_URL || "http://localhost:5173",
-			"https://echo-server-p42j.onrender.com",
-			"https://echo-lxld.onrender.com",
-		],
+		origin: allowedOrigins,
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization"],

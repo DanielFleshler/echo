@@ -57,13 +57,14 @@ if (!fs.existsSync(uploadDir)) {
 const port = process.env.PORT || 8000;
 const server = http.createServer(app);
 
+// CORS - use environment variable for allowed origins
+const allowedOrigins = process.env.FRONTEND_URL
+	? process.env.FRONTEND_URL.split(',')
+	: ["http://localhost:5173"];
+
 const io = new Server(server, {
 	cors: {
-		origin: [
-			process.env.FRONTEND_URL || "http://localhost:5173",
-			"https://echo-lxld.onrender.com",
-			"https://echo-server-p42j.onrender.com",
-		],
+		origin: allowedOrigins,
 		methods: ["GET", "POST"],
 		credentials: true,
 	},
@@ -71,13 +72,13 @@ const io = new Server(server, {
 
 io.use(async (socket, next) => {
 	try {
-		logger.info("Socket connection attempt from:", socket.handshake.address);
-		logger.info("Socket handshake headers:", socket.handshake.headers);
+		if (process.env.NODE_ENV === "development") {
+			logger.info("Socket connection attempt from:", socket.handshake.address);
+		}
 
 		let token;
 		if (socket.handshake.headers.cookie) {
 			const cookies = cookie.parse(socket.handshake.headers.cookie);
-			logger.info("Parsed cookies:", Object.keys(cookies));
 			token = cookies.jwt;
 		}
 
