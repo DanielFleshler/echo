@@ -26,9 +26,23 @@ export default function RoomChatPage() {
 	const [messages, setMessages] = useState([]);
 	const messagesEndRef = useRef(null);
 	const [currentUserAnonymousId, setCurrentUserAnonymousId] = useState(null);
+	const currentUserAnonymousIdRef = useRef(null); // Use ref to avoid closure issues
+
+	// Update ref and isOwn flag when currentUserAnonymousId changes
+	useEffect(() => {
+		currentUserAnonymousIdRef.current = currentUserAnonymousId;
+		if (currentUserAnonymousId) {
+			setMessages((prev) =>
+				prev.map((msg) => ({
+					...msg,
+					isOwn: msg.anonymousId === currentUserAnonymousId,
+				}))
+			);
+		}
+	}, [currentUserAnonymousId]);
 
 	useEffect(() => {
-		const userId = user.userId;
+		const userId = user._id;
 		if (!userId) {
 			navigate("/login");
 			return;
@@ -43,7 +57,52 @@ export default function RoomChatPage() {
 		});
 
 		onEvent("newMessage", (message) => {
-			setMessages((prev) => [...prev, message]);
+			setMessages((prev) => [
+				...prev,
+				{
+					...message,
+					isOwn: message.anonymousId === currentUserAnonymousIdRef.current,
+				},
+			]);
+		});
+
+		onEvent("userJoined", (data) => {
+			// Update participant count in real-time
+			setRoom((prev) => prev ? ({
+				...prev,
+				participantCount: data.participantCount,
+			}) : prev);
+
+			// Only show join message for OTHER users, not yourself
+			if (data.anonymousId !== currentUserAnonymousIdRef.current) {
+				setMessages((prev) => [
+					...prev,
+					{
+						_id: `system-${Date.now()}-${Math.random()}`,
+						type: "system",
+						content: `${data.anonymousId} joined the room`,
+						timestamp: new Date(),
+					},
+				]);
+			}
+		});
+
+		onEvent("userLeft", (data) => {
+			// Add system message for user leave
+			setMessages((prev) => [
+				...prev,
+				{
+					_id: `system-${Date.now()}-${Math.random()}`,
+					type: "system",
+					content: `${data.anonymousId} left the room`,
+					timestamp: new Date(),
+				},
+			]);
+			// Update participant count in real-time
+			setRoom((prev) => prev ? ({
+				...prev,
+				participantCount: data.participantCount,
+			}) : prev);
 		});
 
 		onEvent("error", (error) => {
@@ -62,7 +121,12 @@ export default function RoomChatPage() {
 		const fetchMessages = async () => {
 			try {
 				const res = await roomService.getRoomMessages(roomId, 1, 50);
-				setMessages(res.data.messages);
+				// Mark messages as isOwn after we have the anonymousId
+				const messagesWithOwn = res.data.messages.map((msg) => ({
+					...msg,
+					isOwn: false, // Will be updated once we get currentUserAnonymousId
+				}));
+				setMessages(messagesWithOwn);
 			} catch (error) {
 				toast.showError(error.message);
 			}
@@ -73,6 +137,8 @@ export default function RoomChatPage() {
 			leaveRoom(roomId);
 			offEvent("joinedRoom");
 			offEvent("newMessage");
+			offEvent("userJoined");
+			offEvent("userLeft");
 			offEvent("error");
 		};
 	}, [roomId]);
@@ -119,12 +185,31 @@ export default function RoomChatPage() {
 			<div className="flex-1 overflow-hidden">
 				<div className="h-full overflow-y-auto">
 					<div className="container max-w-4xl mx-auto px-4 py-6">
-						<div className="space-y-4">
-							{messages.map((message) => (
-								<ChatMessage key={message._id} message={message} />
-							))}
-							<div ref={messagesEndRef} />
-						</div>
+						{messages.length === 0 ? (
+							<div className="flex flex-col items-center justify-center h-full text-center">
+								<div className="mb-4 p-6 rounded-full bg-gray-800/50">
+									<Shield className="h-12 w-12 text-purple-400" />
+								</div>
+								<h3 className="text-xl font-semibold text-white mb-2">
+									Start the conversation
+								</h3>
+								<p className="text-gray-400 max-w-md">
+									Be the first to share your thoughts in this anonymous space.
+									Your identity is protected and messages will reset periodically.
+								</p>
+							</div>
+						) : (
+							<div className="space-y-0">
+								{messages.map((message, index) => (
+									<ChatMessage
+										key={message._id}
+										message={message}
+										previousMessage={index > 0 ? messages[index - 1] : null}
+									/>
+								))}
+								<div ref={messagesEndRef} />
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

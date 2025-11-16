@@ -23,6 +23,7 @@ const handleUserLeaveRoom = async (socket, roomId) => {
 		await room.save();
 		socket.to(roomId).emit("userLeft", {
 			anonymousId: socket.anonymousId,
+			participantCount: room.participantCount,
 		});
 		console.log(`User ${socket.userId} has left the room ${roomId}`);
 		socket.userId = null;
@@ -43,14 +44,36 @@ const setupRoomHandlers = (io) => {
 					socket.emit("error", { message: "Room not found" });
 					return;
 				}
+
+				// Check if user is already in the room
 				const existingParticipant = room.activeParticipants.find(
 					(p) => p.userId.toString() === userId.toString()
 				);
+
 				let anonymousId;
 				if (existingParticipant) {
+					// User is already active in the room
 					anonymousId = existingParticipant.anonymousId;
 				} else {
-					anonymousId = generateAnonymousId();
+					// Check participant history for existing anonymous ID
+					const historicalParticipant = room.participantHistory.find(
+						(p) => p.userId.toString() === userId.toString()
+					);
+
+					if (historicalParticipant) {
+						// Reuse existing anonymous ID from history
+						anonymousId = historicalParticipant.anonymousId;
+					} else {
+						// Generate new ID and add to history
+						anonymousId = generateAnonymousId();
+						room.participantHistory.push({
+							userId,
+							anonymousId,
+							firstJoinedAt: new Date(),
+						});
+					}
+
+					// Add to active participants
 					room.activeParticipants.push({
 						userId,
 						anonymousId,
@@ -59,6 +82,7 @@ const setupRoomHandlers = (io) => {
 					room.participantCount = room.activeParticipants.length;
 					await room.save();
 				}
+
 				socket.join(roomId);
 
 				socket.userId = userId;
@@ -70,7 +94,8 @@ const setupRoomHandlers = (io) => {
 					anonymousId,
 					message: "Successfully joined room",
 				});
-				socket.to(roomId).emit("userJoined", {
+				// Notify all users in room about new participant
+				io.to(roomId).emit("userJoined", {
 					anonymousId,
 					participantCount: room.participantCount,
 				});
@@ -90,6 +115,13 @@ const setupRoomHandlers = (io) => {
 					socket.emit("error", { message: "Message cannot be empty" });
 					return;
 				}
+
+				const room = await Room.findById(roomId);
+				if (room) {
+					room.messageCount = (room.messageCount || 0) + 1;
+					await room.save();
+				}
+
 				const message = await RoomMessage.create({
 					content: content.trim(),
 					roomId,

@@ -162,8 +162,7 @@ export default function RoomCard({ room, onClick, variant = "card" }) {
 
 						<div className="flex items-center gap-1 text-gray-400">
 							<MessageCircle className="h-4 w-4" />
-							<span>{Math.floor(Math.random() * 50) + 10}</span>{" "}
-							{/* Mock message count */}
+							<span>{room.messageCount || 0}</span>
 						</div>
 					</div>
 

@@ -58,6 +58,25 @@ const roomSchema = new Schema(
 				},
 			},
 		],
+		participantHistory: [
+			{
+				userId: {
+					type: Schema.Types.ObjectId,
+					ref: "User",
+				},
+				anonymousId: {
+					type: String,
+				},
+				firstJoinedAt: {
+					type: Date,
+					default: Date.now,
+				},
+			},
+		],
+		messageCount: {
+			type: Number,
+			default: 0,
+		},
 		nextResetAt: {
 			type: Date,
 		},
