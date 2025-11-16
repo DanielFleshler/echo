@@ -14,6 +14,7 @@ import RoomsPage from "./pages/RoomsPage";
 import SettingsPage from "./pages/SettingsPage";
 import SignupPage from "./pages/SignupPage";
 import SuccessPage from "./pages/SuccessPage";
+import MessagesPage from "./pages/MessagesPage";
 
 function App() {
 	return (
@@ -77,6 +78,26 @@ function App() {
 							<ProtectedRoute>
 								<Layout showHeader={false}>
 									<RoomChatPage />
+								</Layout>
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/messages"
+						element={
+							<ProtectedRoute>
+								<Layout>
+									<MessagesPage />
+								</Layout>
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/messages/:conversationId"
+						element={
+							<ProtectedRoute>
+								<Layout>
+									<MessagesPage />
 								</Layout>
 							</ProtectedRoute>
 						}

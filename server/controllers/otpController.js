@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const otpEmailTemplate = require("../utils/email/templates/otpEmail");
 const sendEmail = require("../utils/email/email");
 const { sendToken } = require("./authController");
+const logger = require("../utils/logger");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 
 exports.generateOTP = async (req, res) => {
@@ -28,7 +29,7 @@ exports.generateOTP = async (req, res) => {
 
 		return sendSuccess(res, 200, "Verification code sent to your email");
 	} catch (error) {
-		console.error("OTP generation error:", error);
+		logger.error("OTP generation error:", error);
 		return sendError(
 			res,
 			500,
@@ -101,7 +102,7 @@ exports.verifyOTP = async (req, res) => {
 
 		return sendToken(user, 200, res);
 	} catch (error) {
-		console.error("OTP verification error:", error);
+		logger.error("OTP verification error:", error);
 		return sendError(res, 500, "Error verifying code. Please try again later.");
 	}
 };
@@ -134,7 +135,7 @@ exports.resendOTP = async (req, res) => {
 
 		return sendSuccess(res, 200, "Verification code resent to your email");
 	} catch (error) {
-		console.error("OTP resend error:", error);
+		logger.error("OTP resend error:", error);
 		return sendError(
 			res,
 			500,

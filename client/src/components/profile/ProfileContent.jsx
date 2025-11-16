@@ -11,13 +11,16 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useFollower } from "../../context/FollowerContext";
 import { useToast } from "../../context/ToastContext";
+import { useChat } from "../../context/ChatContext";
 import ProfileAvatar from "../UI/ProfileAvatar";
 
 export default function ProfileContent({ profileData, isOwnProfile }) {
 	const { getFollowerStats, toggleFollow } = useFollower();
 	const { showError } = useToast();
+	const { openChat } = useChat();
 	const [followStats, setFollowStats] = useState({ isFollowing: false });
 	const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
+	const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
 	useEffect(() => {
 		const loadFollowStats = async () => {
@@ -28,7 +31,7 @@ export default function ProfileContent({ profileData, isOwnProfile }) {
 						setFollowStats(stats);
 					}
 				} catch (error) {
-					console.error("Error loading follow stats:", error);
+					// Error is already handled by the context
 				}
 			}
 		};
@@ -53,10 +56,22 @@ export default function ProfileContent({ profileData, isOwnProfile }) {
 				}));
 			}
 		} catch (error) {
-			console.error("Error toggling follow:", error);
 			showError("Failed to update follow status");
 		} finally {
 			setIsUpdatingFollow(false);
+		}
+	};
+
+	const handleMessageClick = async () => {
+		if (isCreatingConversation || !profileData || !profileData._id) return;
+
+		try {
+			setIsCreatingConversation(true);
+			await openChat(profileData._id);
+		} catch (error) {
+			showError("Failed to open chat");
+		} finally {
+			setIsCreatingConversation(false);
 		}
 	};
 
@@ -128,9 +143,13 @@ export default function ProfileContent({ profileData, isOwnProfile }) {
 										</>
 									)}
 								</button>
-								<button className="flex items-center gap-1 rounded-full bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+								<button
+									onClick={handleMessageClick}
+									disabled={isCreatingConversation}
+									className={`flex items-center gap-1 rounded-full bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 ${isCreatingConversation ? "opacity-70" : ""}`}
+								>
 									<Mail className="h-4 w-4" />
-									<span>Message</span>
+									<span>{isCreatingConversation ? "Loading..." : "Message"}</span>
 								</button>
 							</div>
 						)}

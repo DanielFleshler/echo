@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const { sendToken } = require("./authController");
 const cloudinary = require("../utils/media/cloudinary");
 const fs = require("fs");
+const logger = require("../utils/logger");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 
 exports.getMe = (req, res) => {
@@ -143,7 +144,7 @@ exports.updateProfilePicture = async (req, res) => {
 					}
 				}
 			} catch (deleteError) {
-				console.error("Error deleting old profile picture:", deleteError);
+				logger.error("Error deleting old profile picture:", deleteError);
 			}
 		}
 
@@ -158,7 +159,7 @@ exports.updateProfilePicture = async (req, res) => {
 			data: { user: updatedUser },
 		});
 	} catch (error) {
-		console.error("Profile picture update error:", error);
+		logger.error("Profile picture update error:", error);
 
 		// Clean up any uploaded files
 		if (req.files && req.files.length > 0) {
@@ -168,7 +169,7 @@ exports.updateProfilePicture = async (req, res) => {
 						fs.unlinkSync(file.path);
 					}
 				} catch (unlinkError) {
-					console.error("Error removing temporary file:", unlinkError);
+					logger.error("Error removing temporary file:", unlinkError);
 				}
 			});
 		}
@@ -266,7 +267,7 @@ exports.deleteProfilePicture = async (req, res) => {
 					}
 				}
 			} catch (deleteError) {
-				console.error(
+				logger.error(
 					"Error deleting profile picture from storage:",
 					deleteError
 				);

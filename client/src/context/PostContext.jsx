@@ -9,6 +9,7 @@ import {
 import PostService from "../services/post.service";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
+import { PAGINATION } from "../constants/config";
 
 const PostContext = createContext();
 
@@ -83,7 +84,7 @@ export const PostProvider = ({ children }) => {
 	};
 
 	const fetchPosts = useCallback(
-		async (pageNum = 1, limit = 15, includeExpired = false) => {
+		async (pageNum = PAGINATION.INITIAL_PAGE, limit = PAGINATION.DEFAULT_PAGE_SIZE, includeExpired = false) => {
 			try {
 				setLoadingPosts(true);
 				const response = await PostService.getAllPosts(
@@ -128,7 +129,7 @@ export const PostProvider = ({ children }) => {
 	);
 
 	const fetchUserPosts = useCallback(
-		async (userId, includeExpired = false, pageNum = 1, limit = 15) => {
+		async (userId, includeExpired = false, pageNum = PAGINATION.INITIAL_PAGE, limit = PAGINATION.DEFAULT_PAGE_SIZE) => {
 			if (!user) return [];
 			try {
 				setLoadingPosts(true);
@@ -179,11 +180,11 @@ export const PostProvider = ({ children }) => {
 		}
 
 		const nextPage = page + 1;
-		return await fetchPosts(nextPage, 15);
+		return await fetchPosts(nextPage, PAGINATION.DEFAULT_PAGE_SIZE);
 	}, [page, hasMore, loadingPosts, fetchPosts]);
 
 	const refreshPosts = useCallback(async () => {
-		return await fetchPosts(1, 15);
+		return await fetchPosts(PAGINATION.INITIAL_PAGE, PAGINATION.DEFAULT_PAGE_SIZE);
 	}, [fetchPosts]);
 
 	const fetchTrendingPosts = useCallback(async () => {
@@ -562,10 +563,10 @@ export const PostProvider = ({ children }) => {
 
 	useEffect(() => {
 		if (user && initialLoad) {
-			fetchPosts(1, 15);
+			fetchPosts(PAGINATION.INITIAL_PAGE, PAGINATION.DEFAULT_PAGE_SIZE);
 			fetchTrendingPosts();
 		}
-	}, [user?._id, initialLoad, fetchPosts, fetchTrendingPosts, showError]);
+	}, [user?._id, initialLoad, fetchPosts, fetchTrendingPosts]);
 
 	const contextValue = useMemo(
 		() => ({

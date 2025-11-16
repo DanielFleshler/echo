@@ -2,8 +2,10 @@ import { Sparkles } from "lucide-react";
 import MessageSidebar from "../components/UI/MessageSidebar";
 import PostFeed from "../components/UI/PostFeed";
 import TrendingSidebar from "../components/UI/TrendingSidebar";
+import ChatModal from "../components/UI/ChatModal";
 import { useAuth } from "../context/AuthContext";
 import { usePost } from "../context/PostContext";
+import { useChat } from "../context/ChatContext";
 import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 export default function HomePage() {
@@ -18,6 +20,7 @@ export default function HomePage() {
 		createPost,
 		getHoursLeft,
 	} = usePost();
+	const { isChatModalOpen, closeChat } = useChat();
 
 	if (authLoading) {
 		return (
@@ -52,6 +55,9 @@ export default function HomePage() {
 					/>
 				</div>
 			</main>
+
+			{/* Chat Modal */}
+			<ChatModal isOpen={isChatModalOpen} onClose={closeChat} />
 		</div>
 	);
 }

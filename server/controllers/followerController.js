@@ -1,6 +1,7 @@
 const Follower = require("../models/followerModel");
 const User = require("../models/userModel");
 const Notification = require("../models/notificationModel");
+const logger = require("../utils/logger");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 
 exports.followUser = async (req, res) => {
@@ -42,7 +43,7 @@ exports.followUser = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in followUser:", error);
+		logger.error("Error in followUser:", error);
 		return sendError(res, 500, "Server error while following user");
 	}
 };
@@ -64,7 +65,7 @@ exports.unfollowUser = async (req, res) => {
 
 		return sendSuccess(res, 200, "User unfollowed successfully");
 	} catch (error) {
-		console.error("Error in unfollowUser:", error);
+		logger.error("Error in unfollowUser:", error);
 		return sendError(res, 500, "Server error while unfollowing user");
 	}
 };
@@ -113,7 +114,7 @@ exports.getFollowers = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in getFollowers:", error);
+		logger.error("Error in getFollowers:", error);
 		return sendError(res, 500, "Server error while getting followers");
 	}
 };
@@ -163,7 +164,7 @@ exports.getFollowing = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in getFollowing:", error);
+		logger.error("Error in getFollowing:", error);
 		return sendError(res, 500, "Server error while getting following users");
 	}
 };
@@ -191,7 +192,7 @@ exports.getFollowerStats = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in getFollowerStats:", error);
+		logger.error("Error in getFollowerStats:", error);
 		return sendError(
 			res,
 			500,
@@ -254,7 +255,7 @@ exports.getFollowingFeed = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in getFollowingFeed:", error);
+		logger.error("Error in getFollowingFeed:", error);
 		return sendError(res, 500, "Server error while getting feed");
 	}
 };

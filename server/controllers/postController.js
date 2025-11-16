@@ -1,5 +1,6 @@
 const Post = require("../models/postModel");
 const fs = require("fs");
+const logger = require("../utils/logger");
 const { sendError, sendSuccess } = require("../utils/http/responseUtils");
 const Notification = require("../models/notificationModel");
 const {
@@ -40,7 +41,7 @@ exports.createPost = async (req, res) => {
 		try {
 			postData.media = await uploadMediaToCloudinary(req.files);
 		} catch (error) {
-			console.error("Media upload error:", error);
+			logger.error("Media upload error:", error);
 			return sendError(res, 500, `Error uploading media: ${error.message}`);
 		}
 		const newPost = await Post.create(postData);
@@ -52,7 +53,7 @@ exports.createPost = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in createPost:", error);
+		logger.error("Error in createPost:", error);
 		cleanupTempFiles(req.files);
 		return sendError(res, 500, "Error creating post", {
 			error: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -140,7 +141,7 @@ exports.getAllPosts = async (req, res) => {
 		const posts = await populatePostFields(findQuery);
 		const enhancedPosts = enhancePostsWithVirtuals(posts);
 
-		console.log(
+		logger.info(
 			`[getAllPosts] Page ${page}, Limit ${limit}, Returned ${
 				enhancedPosts.length
 			} posts, Total: ${totalPosts}, HasMore: ${pagination.totalPages > page}`
@@ -154,7 +155,7 @@ exports.getAllPosts = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error in getAllPosts controller:", error);
+		logger.error("Error in getAllPosts controller:", error);
 		return sendError(res, 500, "Failed to retrieve posts");
 	}
 };
@@ -266,7 +267,7 @@ exports.updatePost = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error updating post:", error);
+		logger.error("Error updating post:", error);
 		cleanupTempFiles(req.files);
 		return sendError(res, 500, "Error updating post", {
 			error: process.env.NODE_ENV === "development" ? error.message : undefined,

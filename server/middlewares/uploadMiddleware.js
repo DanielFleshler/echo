@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const logger = require("../utils/logger");
 const { compressMedia } = require("../utils/media/mediaCompressor");
 
 const storage = multer.diskStorage({
@@ -46,7 +47,7 @@ const compressFiles = async (req, res, next) => {
 
 			const stats = fs.statSync(file.path);
 			if (stats.size > 100 * 1024 * 1024) {
-				console.log(
+				logger.info(
 					`Compressing file: ${file.originalname} (${Math.round(stats.size / (1024 * 1024))}MB)`
 				);
 
@@ -63,10 +64,10 @@ const compressFiles = async (req, res, next) => {
 					try {
 						fs.unlinkSync(originalPath);
 					} catch (err) {
-						console.error("Error deleting original file:", err);
+						logger.error("Error deleting original file:", err);
 					}
 
-					console.log(
+					logger.info(
 						`Compressed to ${Math.round(file.size / (1024 * 1024))}MB`
 					);
 				}
@@ -74,7 +75,7 @@ const compressFiles = async (req, res, next) => {
 		}
 		next();
 	} catch (error) {
-		console.error("Error in file compression middleware:", error);
+		logger.error("Error in file compression middleware:", error);
 		next(error);
 	}
 };

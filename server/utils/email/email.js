@@ -1,4 +1,5 @@
 const brevo = require("@getbrevo/brevo");
+const logger = require("../logger");
 
 const apiInstance = new brevo.TransactionalEmailsApi();
 apiInstance.setApiKey(
@@ -20,7 +21,7 @@ const sendEmail = async (options) => {
 		const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
 		return result;
 	} catch (error) {
-		console.error("Email error:", error);
+		logger.error("Email error:", error);
 		throw error;
 	}
 };
