@@ -35,6 +35,11 @@ export default function RoomsPage() {
 		selectedCategory === "All"
 			? rooms
 			: rooms.filter((room) => room.category === selectedCategory);
+
+	const handleRoomCreated = (newRoom) => {
+		setRooms((prevRooms) => [newRoom, ...prevRooms]);
+	};
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
@@ -181,6 +186,7 @@ export default function RoomsPage() {
 			<CreateRoomModal
 				isOpen={isCreateModalOpen}
 				onClose={() => setIsCreateModalOpen(false)}
+				onRoomCreated={handleRoomCreated}
 			/>
 
 			<RoomDetailModal

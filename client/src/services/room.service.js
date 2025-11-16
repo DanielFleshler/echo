@@ -38,6 +38,18 @@ const roomService = {
 			throw new Error(errorMessage);
 		}
 	},
+
+	createRoom: async (roomData) => {
+		try {
+			const response = await api.post(ROOMS_URL, roomData);
+			return response.data;
+		} catch (error) {
+			console.error("Create room error:", error);
+			const errorMessage =
+				error.response?.data?.message || "Failed to create room.";
+			throw new Error(errorMessage);
+		}
+	},
 };
 
 export default roomService;

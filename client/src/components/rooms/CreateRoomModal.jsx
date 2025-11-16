@@ -1,5 +1,7 @@
 import { Clock, Crown, Info, Users, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import roomService from "../../services/room.service";
+import { useToast } from "../../context/ToastContext";
 
 const categories = [
 	"Support",
@@ -38,7 +40,7 @@ const maxParticipantsOptions = [
 	{ value: 200, label: "200 participants", description: "Large community" },
 ];
 
-export default function CreateRoomModal({ isOpen, onClose }) {
+export default function CreateRoomModal({ isOpen, onClose, onRoomCreated }) {
 	const [formData, setFormData] = useState({
 		name: "",
 		description: "",
@@ -49,6 +51,7 @@ export default function CreateRoomModal({ isOpen, onClose }) {
 	const [errors, setErrors] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const modalRef = useRef(null);
+	const toast = useToast();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -119,17 +122,14 @@ export default function CreateRoomModal({ isOpen, onClose }) {
 		setIsSubmitting(true);
 
 		try {
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-
-			// Close modal and show success
+			const response = await roomService.createRoom(formData);
+			toast.showSuccess("Room created successfully!");
+			onRoomCreated(response.data.room);
 			onClose();
-
-			// In real implementation, this would create the room via API
-			// and refresh the rooms list
 		} catch (error) {
-			console.error("Error creating room:", error);
-			setErrors({ submit: "Failed to create room. Please try again." });
+			setErrors({
+				submit: error.message || "Failed to create room. Please try again.",
+			});
 		} finally {
 			setIsSubmitting(false);
 		}
