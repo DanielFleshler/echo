@@ -5,6 +5,11 @@ const dotenv = require("dotenv");
 const User = require("./models/userModel");
 const Post = require("./models/postModel");
 const Follower = require("./models/followerModel");
+const Notification = require("./models/notificationModel");
+const Room = require("./models/roomModel");
+const RoomMessage = require("./models/roomMessageModel");
+const Conversation = require("./models/conversationModel");
+const Message = require("./models/messageModel");
 
 dotenv.config({ path: "./.env" });
 
@@ -24,10 +29,16 @@ const connectDB = async () => {
 
 const clearDatabase = async () => {
 	try {
+		console.log("Clearing all collections...");
 		await User.deleteMany({});
 		await Post.deleteMany({});
 		await Follower.deleteMany({});
-		console.log("Database cleared!");
+		await Notification.deleteMany({});
+		await Room.deleteMany({});
+		await RoomMessage.deleteMany({});
+		await Conversation.deleteMany({});
+		await Message.deleteMany({});
+		console.log("Database cleared! All collections are now empty.");
 	} catch (err) {
 		console.error("Error clearing database:", err);
 		process.exit(1);
