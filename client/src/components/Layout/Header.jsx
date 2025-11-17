@@ -2,6 +2,7 @@ import {
 	Bell,
 	Home,
 	LogOut,
+	Mail,
 	Menu,
 	Search,
 	Settings,
@@ -151,6 +152,18 @@ export default function Header() {
 							<Users className="h-5 w-5 sm:h-4 sm:w-4" />
 							<span className="hidden md:inline text-sm font-medium">Rooms</span>
 						</Link>
+						<Link
+							to="/messages"
+							className={`flex items-center gap-1.5 transition-all duration-200 p-2 rounded-lg touch-manipulation ${
+								isActive("/messages")
+									? "text-purple-400 bg-purple-500/10"
+									: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
+							}`}
+							aria-label="Messages"
+						>
+							<Mail className="h-5 w-5 sm:h-4 sm:w-4" />
+							<span className="hidden md:inline text-sm font-medium">Messages</span>
+						</Link>
 						<button
 							ref={searchButtonRef}
 							onClick={handleOpenSearch}
@@ -261,6 +274,17 @@ export default function Header() {
 							>
 								<Users className="h-5 w-5" />
 								<span className="text-base font-medium">Rooms</span>
+							</Link>
+							<Link
+								to="/messages"
+								className={`flex items-center gap-3 p-4 rounded-lg transition-all duration-200 ${
+									isActive("/messages")
+										? "text-purple-400 bg-purple-500/10"
+										: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
+								}`}
+							>
+								<Mail className="h-5 w-5" />
+								<span className="text-base font-medium">Messages</span>
 							</Link>
 							<button
 								onClick={() => {
