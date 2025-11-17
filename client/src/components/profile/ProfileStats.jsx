@@ -27,28 +27,28 @@ export default function ProfileStats({
 	}, [userId, getFollowerStats]);
 
 	return (
-		<div className="mt-6 flex justify-start gap-8 border-b border-gray-800 py-4">
+		<div className="mt-4 sm:mt-6 flex justify-start gap-4 sm:gap-8 border-b border-gray-800 py-3 sm:py-4">
 			<div className="text-center">
-				<div className="font-bold text-white">{postsCount}</div>
-				<div className="text-sm text-gray-400">Echoes</div>
+				<div className="text-base sm:text-lg font-bold text-white">{postsCount}</div>
+				<div className="text-xs sm:text-sm text-gray-400">Echoes</div>
 			</div>
 			<button
 				onClick={() => onOpenFollowersModal("following")}
-				className="text-center hover:opacity-80 transition-opacity"
+				className="text-center hover:opacity-80 transition-opacity touch-manipulation"
 			>
-				<div className="font-bold text-white">
+				<div className="text-base sm:text-lg font-bold text-white">
 					{isLoadingStats ? "..." : stats.following}
 				</div>
-				<div className="text-sm text-gray-400">Following</div>
+				<div className="text-xs sm:text-sm text-gray-400">Following</div>
 			</button>
 			<button
 				onClick={() => onOpenFollowersModal("followers")}
-				className="text-center hover:opacity-80 transition-opacity"
+				className="text-center hover:opacity-80 transition-opacity touch-manipulation"
 			>
-				<div className="font-bold text-white">
+				<div className="text-base sm:text-lg font-bold text-white">
 					{isLoadingStats ? "..." : stats.followers}
 				</div>
-				<div className="text-sm text-gray-400">Followers</div>
+				<div className="text-xs sm:text-sm text-gray-400">Followers</div>
 			</button>
 		</div>
 	);

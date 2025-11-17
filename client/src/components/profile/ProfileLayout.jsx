@@ -222,7 +222,7 @@ export default function ProfileLayout({ userId }) {
 						isOwnProfile={isOwnProfile}
 					/>
 
-					<div className="container px-4">
+					<div className="container px-3 sm:px-4">
 						<ProfileStats
 							postsCount={userPosts.length}
 							onOpenFollowersModal={openFollowersModal}

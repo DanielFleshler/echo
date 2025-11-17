@@ -182,14 +182,16 @@ export default function PostForm({
 	};
 
 	return (
-		<Card className="mb-6">
+		<Card className="mb-4 sm:mb-6 p-3 sm:p-4 lg:p-5">
 			<form onSubmit={handleSubmit}>
-				<div className="flex gap-3">
-					<ProfileAvatar user={user} size="sm" />
+				<div className="flex gap-2 sm:gap-3">
+					<div className="flex-shrink-0">
+						<ProfileAvatar user={user} size="sm" />
+					</div>
 
-					<div className="flex-1">
+					<div className="flex-1 min-w-0">
 						<textarea
-							className="min-h-[80px] w-full resize-none rounded-lg border border-gray-800/80 bg-gray-900/50 p-3 text-sm text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors duration-200"
+							className="min-h-[80px] sm:min-h-[100px] w-full resize-none rounded-lg border border-gray-800/80 bg-gray-900/50 p-2.5 sm:p-3 text-sm sm:text-base text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors duration-200"
 							placeholder={`What's on your mind? It'll disappear in ${
 								expirationTime || 24
 							} hours..`}
@@ -198,7 +200,7 @@ export default function PostForm({
 						/>
 
 						{mediaItems.length > 0 && (
-							<div className="mt-3 flex flex-wrap gap-2">
+							<div className="mt-2 sm:mt-3 flex flex-wrap gap-2">
 								{mediaItems.map((item, idx) => {
 									const url = item.isExisting ? item.url : item.previewUrl;
 
@@ -207,7 +209,7 @@ export default function PostForm({
 									return (
 										<div
 											key={item.id || item.tempId || idx}
-											className="relative group h-24 w-24 rounded-md overflow-hidden shadow-md"
+											className="relative group h-20 w-20 sm:h-24 sm:w-24 rounded-md overflow-hidden shadow-md"
 										>
 											{isImage(item.type) ? (
 												<img
@@ -236,7 +238,7 @@ export default function PostForm({
 											<button
 												type="button"
 												onClick={() => removeMedia(item)}
-												className="absolute top-1 right-1 rounded-full bg-gray-900/90 text-white hover:bg-gray-900 p-1 transition-all opacity-0 group-hover:opacity-100"
+												className="absolute top-1 right-1 rounded-full bg-gray-900/90 text-white hover:bg-gray-900 p-1.5 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 touch-manipulation"
 												aria-label="Remove media"
 											>
 												<XCircle className="h-4 w-4" aria-hidden="true" />
@@ -253,15 +255,16 @@ export default function PostForm({
 							</div>
 						)}
 
-						<div className="mt-3 flex items-center justify-between">
-							<div className="flex gap-2">
-								<label className="cursor-pointer rounded-full p-2 hover:bg-gray-800/70 transition-colors duration-200">
+						<div className="mt-2 sm:mt-3 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-3">
+							<div className="flex gap-1">
+								<label className="cursor-pointer rounded-full p-2 hover:bg-gray-800/70 transition-colors duration-200 touch-manipulation">
 									<input
 										type="file"
 										accept="image/*,video/*"
 										className="hidden"
 										onChange={handleFileChange}
 										multiple
+										aria-label="Add images or videos"
 									/>
 									<Image
 										className="h-5 w-5 text-purple-400"
@@ -271,27 +274,28 @@ export default function PostForm({
 								</label>
 							</div>
 
-							<div className="flex items-center gap-3">
-								<div className="flex items-center gap-1.5 text-sm">
-									<Clock className="h-4 w-4 text-gray-400" aria-hidden="true" />
-									<span className="text-gray-400">Duration:</span>
+							<div className="flex items-center gap-2 sm:gap-3 w-full xs:w-auto">
+								<div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm flex-1 xs:flex-initial">
+									<Clock className="h-4 w-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+									<span className="text-gray-400 hidden sm:inline">Duration:</span>
 									<select
 										value={expirationTime}
 										onChange={(e) => setExpirationTime(e.target.value)}
-										className="rounded border border-gray-800/80 bg-gray-900/50 px-1.5 py-1 text-sm text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+										className="rounded border border-gray-800/80 bg-gray-900/50 px-1.5 sm:px-2 py-1 sm:py-1.5 text-xs sm:text-sm text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 min-w-0 flex-1 xs:flex-initial"
+										aria-label="Post duration"
 									>
-										<option value="12">12 hours</option>
-										<option value="24">24 hours</option>
-										<option value="48">48 hours</option>
-										<option value="72">3 days</option>
-										<option value="168">7 days</option>
+										<option value="12">12h</option>
+										<option value="24">24h</option>
+										<option value="48">48h</option>
+										<option value="72">3d</option>
+										<option value="168">7d</option>
 									</select>
 								</div>
 
 								<button
 									type="submit"
 									disabled={isSubmitting}
-									className="rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-70"
+									className="rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-70 touch-manipulation whitespace-nowrap"
 								>
 									{isSubmitting ? "Posting..." : isEditing ? "Update" : "Post"}
 								</button>

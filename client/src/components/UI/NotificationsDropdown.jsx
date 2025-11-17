@@ -180,7 +180,8 @@ export default function NotificationsDropdown({
 	if (!isOpen) return null;
 
 	// Position the notifications dropdown relative to the navbar button
-	const style = anchorRect
+	const isMobile = window.innerWidth < 768;
+	const style = anchorRect && !isMobile
 		? {
 				position: "fixed",
 				top: `${anchorRect.bottom + 12}px`,
@@ -188,45 +189,46 @@ export default function NotificationsDropdown({
 				zIndex: 100,
 				width: "320px",
 		  }
+		: isMobile
+		? {
+				position: "fixed",
+				top: `${anchorRect?.bottom || 56}px`,
+				left: "50%",
+				transform: "translateX(-50%)",
+				zIndex: 100,
+				width: "calc(100vw - 1rem)",
+				maxWidth: "400px",
+		  }
 		: {};
 
 	return (
 		<>
-			<style>{`
-                                .max-h-96.overflow-y-auto::-webkit-scrollbar {
-                                        display: none;
-                                }
-                        `}</style>
 			<div
 				className="fixed inset-0 z-40 bg-transparent"
 				onClick={onClose}
 			></div>
 			<div
 				ref={dropdownRef}
-				className="rounded-xl border border-gray-800/50 bg-gray-900/90 backdrop-blur-sm shadow-xl transform 
+				className="rounded-xl border border-gray-800/50 bg-gray-900/90 backdrop-blur-sm shadow-xl transform
   transition-all duration-200 ease-out z-50 overflow-hidden"
 				style={{
 					...style,
 					boxShadow: "0 10px 25px rgba(0, 0, 0, 0.4)",
 				}}
 			>
-				{/* Small decorative arrow pointing up to navbar */}
-				<div
-					className="absolute w-4 h-4 bg-gray-900/90 backdrop-blur-sm border-t border-l border-gray-800/50 transform 
+				{/* Small decorative arrow pointing up to navbar - hide on mobile */}
+				{!isMobile && (
+					<div
+						className="absolute w-4 h-4 bg-gray-900/90 backdrop-blur-sm border-t border-l border-gray-800/50 transform
   rotate-45 -translate-y-2"
-					style={{
-						top: "0",
-						right: "24px",
-					}}
-				></div>
+						style={{
+							top: "0",
+							right: "24px",
+						}}
+					></div>
+				)}
 
-				<div
-					className="max-h-96 overflow-y-auto"
-					style={{
-						scrollbarWidth: "none",
-						msOverflowStyle: "none",
-					}}
-				>
+				<div className="max-h-96 overflow-y-auto hide-scrollbar">
 					{/* Header */}
 					<div
 						className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/50 p-3.5 flex 

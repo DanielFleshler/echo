@@ -80,38 +80,31 @@ export default function SearchModal({ isOpen, onClose, anchorRect }) {
 	const style = anchorRect
 		? {
 				position: "fixed",
-				top: `${anchorRect.bottom + 12}px`,
+				top: `${anchorRect.bottom + 8}px`,
 				left: "50%",
 				transform: "translateX(-50%)",
 				zIndex: 100,
 				maxWidth: "500px",
-				width: "90%",
+				width: window.innerWidth < 640 ? "calc(100vw - 1rem)" : "90%",
 		  }
 		: {};
 
 	return (
 		<>
-			<style jsx>{`
-				.overflow-y-auto::-webkit-scrollbar {
-					display: none;
-				}
-			`}</style>
-			<div
-				className="fixed inset-0 z-40 bg-transparent"
-				onClick={onClose}
-			></div>
 			<div
 				className="fixed inset-0 z-40 bg-transparent"
 				onClick={onClose}
 			></div>
 			<div
 				ref={modalRef}
-				className="rounded-xl border border-gray-800/50 bg-gray-900/90 backdrop-blur-sm shadow-xl transform 
+				className="rounded-lg sm:rounded-xl border border-gray-800/50 bg-gray-900/95 backdrop-blur-sm shadow-xl transform
   transition-all duration-200 ease-out z-50"
 				style={{
 					...style,
 					boxShadow: "0 10px 25px rgba(0, 0, 0, 0.4)",
 				}}
+				role="dialog"
+				aria-label="Search users"
 			>
 				{/* Small decorative arrow pointing up to navbar */}
 				<div
@@ -124,71 +117,75 @@ export default function SearchModal({ isOpen, onClose, anchorRect }) {
 					}}
 				></div>
 
-				<div className="p-5">
+				<div className="p-3 sm:p-5">
 					{/* Search Input */}
-					<div className="mb-4">
+					<div className="mb-3 sm:mb-4">
 						<div className="relative w-full">
 							<input
 								ref={inputRef}
 								type="text"
 								placeholder="Search for users..."
-								className="w-full rounded-lg border border-gray-800/80 bg-gray-900/50 pl-10 pr-4 py-2.5 text-white 
-  placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 
+								className="w-full rounded-lg border border-gray-800/80 bg-gray-900/50 pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base text-white
+  placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500
   transition-colors duration-200"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
+								aria-label="Search for users"
 							/>
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+							<Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" aria-hidden="true" />
 						</div>
 					</div>
 
 					{/* Search Results */}
 					<div
-						className="max-h-80 overflow-y-auto"
-						style={{ minHeight: searchQuery ? "100px" : "0" }}
+						className="max-h-60 sm:max-h-80 overflow-y-auto hide-scrollbar"
+						style={{
+							minHeight: searchQuery ? "100px" : "0"
+						}}
 					>
 						{!searchQuery ? (
-							<div className="text-center py-8">
-								<Search className="mx-auto h-6 w-6 text-gray-400" />
-								<p className="mt-3 text-sm text-gray-400">
+							<div className="text-center py-6 sm:py-8">
+								<Search className="mx-auto h-5 w-5 sm:h-6 sm:w-6 text-gray-400" aria-hidden="true" />
+								<p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-400">
 									Type to search for users...
 								</p>
 							</div>
 						) : searching ? (
-							<div className="text-center py-8">
-								<Sparkles className="mx-auto h-6 w-6 animate-pulse text-purple-500" />
-								<p className="mt-3 text-sm text-gray-300">Searching...</p>
+							<div className="text-center py-6 sm:py-8">
+								<Sparkles className="mx-auto h-5 w-5 sm:h-6 sm:w-6 animate-pulse text-purple-500" aria-hidden="true" />
+								<p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-300">Searching...</p>
 							</div>
 						) : searchResults.length === 0 ? (
-							<div className="rounded-lg bg-gray-900/50 border border-gray-800/50 p-5 text-center shadow-md">
+							<div className="rounded-lg bg-gray-900/50 border border-gray-800/50 p-3 sm:p-5 text-center shadow-md">
 								<div
-									className="mx-auto mb-3 h-12 w-12 rounded-full bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-3 
+									className="mx-auto mb-2 sm:mb-3 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-2 sm:p-3
   flex items-center justify-center"
 								>
-									<Users className="h-6 w-6 text-gray-500" />
+									<Users className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" aria-hidden="true" />
 								</div>
-								<h3 className="text-sm font-medium text-white">
+								<h3 className="text-xs sm:text-sm font-medium text-white">
 									No results found
 								</h3>
-								<p className="mt-2 text-xs text-gray-400">
+								<p className="mt-1 sm:mt-2 text-xs text-gray-400">
 									No matches for "{searchQuery}"
 								</p>
 							</div>
 						) : (
-							<div className="space-y-3">
+							<div className="space-y-2 sm:space-y-3">
 								{searchResults.map((user) => (
-									<div
+									<button
 										key={user._id}
-										className="p-3 flex items-center gap-3 rounded-lg border border-gray-800/50 bg-gray-900/40 
-  hover:bg-gray-800/30 transition-colors duration-200 cursor-pointer"
+										className="w-full p-2 sm:p-3 flex items-center gap-2 sm:gap-3 rounded-lg border border-gray-800/50 bg-gray-900/40
+  hover:bg-gray-800/30 transition-colors duration-200 cursor-pointer touch-manipulation text-left"
 										onClick={() => {
 											navigate(`/profile/${user._id}`);
 											onClose();
 										}}
+										aria-label={`View ${user.fullName}'s profile`}
 									>
 										<div
-											className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-700/30 to-blue-700/30 flex items-center
-   justify-center shadow-md overflow-hidden"
+											className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-br from-purple-700/30 to-blue-700/30 flex items-center
+   justify-center shadow-md overflow-hidden flex-shrink-0"
 										>
 											{user.profilePicture ? (
 												<img
@@ -197,16 +194,16 @@ export default function SearchModal({ isOpen, onClose, anchorRect }) {
 													className="w-full h-full object-cover"
 												/>
 											) : (
-												<User className="h-5 w-5 text-gray-300" />
+												<User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" aria-hidden="true" />
 											)}
 										</div>
-										<div>
-											<h4 className="font-medium text-white">
+										<div className="min-w-0 flex-1">
+											<h4 className="font-medium text-white text-sm sm:text-base truncate">
 												{user.fullName}
 											</h4>
-											<p className="text-xs text-gray-400">@{user.username}</p>
+											<p className="text-xs text-gray-400 truncate">@{user.username}</p>
 										</div>
-									</div>
+									</button>
 								))}
 							</div>
 						)}

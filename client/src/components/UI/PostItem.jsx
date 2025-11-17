@@ -191,15 +191,15 @@ export default function PostItem({
 
 	if (isEditing) {
 		return (
-			<Card className="mb-4">
+			<Card className="mb-3 sm:mb-4 p-3 sm:p-4">
 				<div className="mb-3 flex items-center justify-between">
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-2 sm:gap-3">
 						<ProfileAvatar user={post.user || currentUser} size="sm" />
-						<h3 className="font-medium text-white">Edit Post</h3>
+						<h3 className="font-medium text-white text-sm sm:text-base">Edit Post</h3>
 					</div>
 					<button
 						onClick={() => setIsEditing(false)}
-						className="text-xs text-gray-400 hover:text-purple-400"
+						className="text-xs sm:text-sm text-gray-400 hover:text-purple-400 touch-manipulation p-2"
 					>
 						Cancel
 					</button>
@@ -219,36 +219,37 @@ export default function PostItem({
 	}
 
 	return (
-		<Card className="mb-4 overflow-visible">
-			<div className="mb-4 flex items-center justify-between">
-				<div className="flex items-center gap-3">
+		<Card className="mb-3 sm:mb-4 p-3 sm:p-4 lg:p-5 overflow-visible">
+			<div className="mb-3 sm:mb-4 flex items-start sm:items-center justify-between gap-2">
+				<div className="flex items-center gap-2 sm:gap-3">
 					<ProfileAvatar user={post.user || currentUser} size="sm" />
-					<div>
+					<div className="min-w-0 flex-1">
 						{post.user && post.user._id ? (
 							<Link
 								to={`/profile/${post.user._id}`}
-								className="font-medium text-white hover:text-purple-400 transition-colors duration-200"
+								className="font-medium text-white hover:text-purple-400 transition-colors duration-200 text-sm sm:text-base block truncate"
 							>
 								{post.user?.fullName || currentUser?.fullName || "User"}
 							</Link>
 						) : (
-							<h3 className="font-medium text-white">
+							<h3 className="font-medium text-white text-sm sm:text-base truncate">
 								{post.user?.fullName || currentUser?.fullName || "User"}
 							</h3>
 						)}
-						<p className="text-xs text-gray-400 mt-0.5">
+						<p className="text-xs text-gray-400 mt-0.5 truncate">
 							{formatDate(post.createdAt)}
 						</p>
 					</div>
 				</div>
 
 				{!post.expired ? (
-					<div className="flex items-center gap-1.5 rounded-full bg-purple-900/30 px-3 py-1 text-xs font-medium text-purple-400 shadow-sm border border-purple-900/20">
+					<div className="flex items-center gap-1 sm:gap-1.5 rounded-full bg-purple-900/30 px-2 sm:px-3 py-1 text-xs font-medium text-purple-400 shadow-sm border border-purple-900/20 flex-shrink-0">
 						<Clock className="h-3 w-3" />
-						<span>{getHoursLeft()}h left</span>
+						<span className="hidden xs:inline sm:inline">{getHoursLeft()}h left</span>
+						<span className="xs:hidden">{getHoursLeft()}h</span>
 					</div>
 				) : (
-					<div className="flex items-center gap-1.5 rounded-full bg-gray-800/70 px-3 py-1 text-xs font-medium text-gray-400 border border-gray-800/50">
+					<div className="flex items-center gap-1 sm:gap-1.5 rounded-full bg-gray-800/70 px-2 sm:px-3 py-1 text-xs font-medium text-gray-400 border border-gray-800/50 flex-shrink-0">
 						<Clock className="h-3 w-3" />
 						<span>Expired</span>
 					</div>
@@ -256,13 +257,13 @@ export default function PostItem({
 			</div>
 
 			{/* Post Content */}
-			<div className="mb-4">
-				<p className="text-white/90 whitespace-pre-wrap break-words">{post.content}</p>
+			<div className="mb-3 sm:mb-4">
+				<p className="text-white/90 whitespace-pre-wrap break-words text-sm sm:text-base">{post.content}</p>
 			</div>
 
 			{/* Post Media - Modern Style */}
 			{post.media && post.media.length > 0 && (
-				<div className="mb-4 overflow-hidden rounded-xl bg-gray-900/30">
+				<div className="mb-3 sm:mb-4 overflow-hidden rounded-lg sm:rounded-xl bg-gray-900/30">
 					{post.media.length === 1 ? (
 						<div className="aspect-video relative">
 							{(post.media[0].type === "image" || post.media[0].type?.startsWith("image/")) && (
@@ -358,39 +359,43 @@ export default function PostItem({
 
 			{/* Post Actions */}
 			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-3 sm:gap-4">
 					{/* View count */}
-					<div className="flex items-center gap-1 text-gray-400 text-sm">
-						<Eye className="h-4 w-4" />
+					<div className="flex items-center gap-1 sm:gap-1.5 text-gray-400 text-sm">
+						<Eye className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden="true" />
 						<span>{viewCount}</span>
 					</div>
 
 					{/* Comment button */}
 					<button
 						onClick={() => setShowComments(!showComments)}
-						className="flex items-center gap-1 text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm"
+						className="flex items-center gap-1 sm:gap-1.5 text-gray-400 hover:text-purple-400 transition-colors duration-200 text-sm touch-manipulation p-1 -m-1"
+						aria-label={`${commentCount} comments`}
+						aria-expanded={showComments}
 					>
-						<MessageCircle className="h-4 w-4" />
+						<MessageCircle className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden="true" />
 						<span>{commentCount}</span>
 					</button>
 				</div>
 
 				{/* Admin actions */}
 				{showActions && isOwnPost && !post.expired && (
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-1.5 sm:gap-2">
 						<button
 							onClick={() => setIsEditing(true)}
-							className="rounded-md bg-gray-800 px-2.5 py-1 text-xs font-medium text-white hover:bg-gray-700 transition-colors duration-200"
+							className="rounded-md bg-gray-800 p-2 sm:px-2.5 sm:py-1.5 text-xs font-medium text-white hover:bg-gray-700 transition-colors duration-200 touch-manipulation"
+							aria-label="Edit post"
 						>
-							<Edit2 className="h-3.5 w-3.5" />
+							<Edit2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
 							<span className="sr-only">Edit</span>
 						</button>
 						<button
 							onClick={handleDelete}
 							disabled={isDeleting}
-							className="rounded-md bg-red-900/30 px-2.5 py-1 text-xs font-medium text-red-400 hover:bg-red-900/50 transition-colors duration-200"
+							className="rounded-md bg-red-900/30 p-2 sm:px-2.5 sm:py-1.5 text-xs font-medium text-red-400 hover:bg-red-900/50 transition-colors duration-200 touch-manipulation disabled:opacity-50"
+							aria-label="Delete post"
 						>
-							<Trash2 className="h-3.5 w-3.5" />
+							<Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
 							<span className="sr-only">Delete</span>
 						</button>
 					</div>
@@ -401,7 +406,8 @@ export default function PostItem({
 					<button
 						onClick={handleRenew}
 						disabled={isRenewing}
-						className="rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-70 transition-colors duration-200"
+						className="rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-70 transition-colors duration-200 touch-manipulation"
+						aria-label="Renew post"
 					>
 						{isRenewing ? "Renewing..." : "Renew Post"}
 					</button>
@@ -410,7 +416,7 @@ export default function PostItem({
 
 			{/* Comments section */}
 			{showComments && (
-				<div className="mt-4 pt-4 border-t border-gray-800/50">
+				<div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-800/50">
 					<CommentSection
 						post={post}
 						onAddComment={addComment}
@@ -424,12 +430,21 @@ export default function PostItem({
 			{/* Video Modal */}
 			{videoModalUrl && (
 				<div
-					className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+					className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
 					onClick={() => setVideoModalUrl(null)}
+					role="dialog"
+					aria-label="Video player"
 				>
+					<button
+						onClick={() => setVideoModalUrl(null)}
+						className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl font-bold w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 transition-colors touch-manipulation"
+						aria-label="Close video"
+					>
+						×
+					</button>
 					<video
 						src={videoModalUrl}
-						className="max-h-screen max-w-screen-lg"
+						className="max-h-full max-w-full rounded-lg"
 						controls
 						autoPlay
 						onClick={(e) => e.stopPropagation()}

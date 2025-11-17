@@ -262,14 +262,14 @@ export default function SettingsPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-gradient-to-b from-gray-900 to-gray-950">
 			{/* Header */}
-			<header className="sticky top-0 z-10 border-b bg-gray-950/80 backdrop-blur-md">
-				<div className="container flex h-16 items-center justify-between px-4">
-					<div className="flex items-center gap-3">
-						<Link to="/profile" className="rounded-full p-2 hover:bg-gray-800">
+			<header className="sticky top-0 z-10 border-b bg-gray-950/80 backdrop-blur-md border-gray-800/50">
+				<div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+					<div className="flex items-center gap-2 sm:gap-3">
+						<Link to="/profile" className="rounded-full p-2 hover:bg-gray-800 touch-manipulation" aria-label="Back to profile">
 							<ArrowLeft className="h-5 w-5 text-white" />
 							<span className="sr-only">Back</span>
 						</Link>
-						<h1 className="text-lg font-semibold text-white">Settings</h1>
+						<h1 className="text-base sm:text-lg font-semibold text-white">Settings</h1>
 					</div>
 					<div className="flex items-center gap-2">
 						<button
@@ -283,143 +283,151 @@ export default function SettingsPage() {
 								}
 							}}
 							disabled={profileForm.isSubmitting || passwordForm.isSubmitting || isUploadingPicture}
-							className="flex items-center gap-1 rounded-full bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+							className="flex items-center gap-1 rounded-full bg-purple-600 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50 touch-manipulation"
 						>
-							{profileForm.isSubmitting || passwordForm.isSubmitting || isUploadingPicture ? "Saving..." : "Save Changes"}
+							<span className="hidden xs:inline">{profileForm.isSubmitting || passwordForm.isSubmitting || isUploadingPicture ? "Saving..." : "Save Changes"}</span>
+							<span className="xs:hidden">{profileForm.isSubmitting || passwordForm.isSubmitting || isUploadingPicture ? "..." : "Save"}</span>
 						</button>
 					</div>
 				</div>
 			</header>
 
-			<main className="container flex-1 px-4 py-8">
+			<main className="container flex-1 px-3 sm:px-4 py-4 sm:py-8">
 				<div className="mx-auto max-w-4xl">
 					{/* Settings Nav */}
-					<div className="mb-8 flex flex-wrap gap-4 border-b border-gray-800 pb-4">
+					<div className="mb-4 sm:mb-8 flex flex-wrap gap-2 sm:gap-4 border-b border-gray-800 pb-3 sm:pb-4">
 						<button
 							onClick={() => setActiveTab("profile")}
-							className={`rounded-full px-4 py-2 text-sm font-medium ${
+							className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation transition-colors ${
 								activeTab === "profile"
 									? "bg-purple-600 text-white"
 									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 							}`}
+							aria-pressed={activeTab === "profile"}
 						>
-							Profile Details
+							<span className="hidden xs:inline">Profile Details</span>
+							<span className="xs:hidden">Profile</span>
 						</button>
 						<button
 							onClick={() => setActiveTab("account")}
-							className={`rounded-full px-4 py-2 text-sm font-medium ${
+							className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation transition-colors ${
 								activeTab === "account"
 									? "bg-purple-600 text-white"
 									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 							}`}
+							aria-pressed={activeTab === "account"}
 						>
-							Profile Picture
+							<span className="hidden xs:inline">Profile Picture</span>
+							<span className="xs:hidden">Picture</span>
 						</button>
 						<button
 							onClick={() => setActiveTab("password")}
-							className={`rounded-full px-4 py-2 text-sm font-medium ${
+							className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation transition-colors ${
 								activeTab === "password"
 									? "bg-purple-600 text-white"
 									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 							}`}
+							aria-pressed={activeTab === "password"}
 						>
 							Password
 						</button>
 						<button
 							onClick={() => setActiveTab("danger")}
-							className={`rounded-full px-4 py-2 text-sm font-medium ${
+							className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium touch-manipulation transition-colors ${
 								activeTab === "danger"
 									? "bg-red-600 text-white"
 									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 							}`}
+							aria-pressed={activeTab === "danger"}
 						>
-							Danger Zone
+							<span className="hidden xs:inline">Danger Zone</span>
+							<span className="xs:hidden">Danger</span>
 						</button>
 					</div>
 
 					{/* Profile Settings Section */}
 					{activeTab === "profile" && (
-						<form onSubmit={profileForm.handleSubmit} className="space-y-6">
+						<form onSubmit={profileForm.handleSubmit} className="space-y-4 sm:space-y-6">
 							{profileForm.submitError && (
-								<div className="rounded-md bg-red-900/30 p-3 border border-red-900 text-sm text-red-400">
+								<div className="rounded-md bg-red-900/30 p-2.5 sm:p-3 border border-red-900 text-xs sm:text-sm text-red-400" role="alert">
 									{profileForm.submitError}
 								</div>
 							)}
-							<div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
-								<h2 className="text-xl font-semibold text-white">
+							<div className="space-y-3 sm:space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-3 sm:p-4">
+								<h2 className="text-lg sm:text-xl font-semibold text-white">
 									Basic Information
 								</h2>
-								<div className="grid gap-4 grid-cols-2">
-									<div className="space-y-2">
-										<label htmlFor="fullName" className="text-sm font-medium text-gray-300">Full Name</label>
+								<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="fullName" className="text-xs sm:text-sm font-medium text-gray-300">Full Name</label>
 										<div className="relative">
-											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><User className="h-5 w-5" /></span>
+											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><User className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></span>
 											<input type="text" id="fullName" name="fullName" value={profileForm.values.fullName} onChange={profileForm.handleChange}
-												className={`w-full rounded-lg border ${profileForm.errors.fullName ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 pl-10 pr-4 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="Your full name" />
+												className={`w-full rounded-lg border ${profileForm.errors.fullName ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 sm:py-2.5 pl-10 pr-3 sm:pr-4 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="Your full name" />
 										</div>
 										{profileForm.errors.fullName && <p className="text-xs text-red-400 mt-1">{profileForm.errors.fullName}</p>}
 									</div>
-									<div className="space-y-2">
-										<label htmlFor="username" className="text-sm font-medium text-gray-300">Username</label>
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="username" className="text-xs sm:text-sm font-medium text-gray-300">Username</label>
 										<div className="relative">
 											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><span className="text-gray-500">@</span></span>
-											<input type="text" id="username" name="username" value={profileForm.values.username} disabled className="w-full cursor-not-allowed rounded-lg border border-gray-700 bg-gray-800 py-2 pl-10 pr-4 text-gray-400 focus:outline-none" placeholder="username" />
+											<input type="text" id="username" name="username" value={profileForm.values.username} disabled className="w-full cursor-not-allowed rounded-lg border border-gray-700 bg-gray-800 py-2 sm:py-2.5 pl-10 pr-3 sm:pr-4 text-sm sm:text-base text-gray-400 focus:outline-none" placeholder="username" />
 										</div>
 									</div>
 								</div>
-								<div className="space-y-2">
-									<label htmlFor="email" className="text-sm font-medium text-gray-300">Email Address</label>
+								<div className="space-y-1.5 sm:space-y-2">
+									<label htmlFor="email" className="text-xs sm:text-sm font-medium text-gray-300">Email Address</label>
 									<div className="relative">
-										<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Mail className="h-5 w-5" /></span>
-										<input type="email" id="email" name="email" value={profileForm.values.email} disabled className="w-full cursor-not-allowed rounded-lg border border-gray-700 bg-gray-800 py-2 pl-10 pr-4 text-gray-400 focus:outline-none" />
+										<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Mail className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></span>
+										<input type="email" id="email" name="email" value={profileForm.values.email} disabled className="w-full cursor-not-allowed rounded-lg border border-gray-700 bg-gray-800 py-2 sm:py-2.5 pl-10 pr-3 sm:pr-4 text-sm sm:text-base text-gray-400 focus:outline-none" />
 									</div>
 									<p className="text-xs text-gray-500">Email address cannot be changed</p>
 								</div>
 							</div>
 
-							<div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
-								<h2 className="text-xl font-semibold text-white">Profile Details</h2>
-								<div className="space-y-2">
-									<label htmlFor="bio" className="text-sm font-medium text-gray-300">Bio</label>
-									<textarea id="bio" name="bio" value={profileForm.values.bio} onChange={profileForm.handleChange} rows="3" className={`w-full rounded-lg border ${profileForm.errors.bio ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="Write a short bio about yourself..."></textarea>
+							<div className="space-y-3 sm:space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-3 sm:p-4">
+								<h2 className="text-lg sm:text-xl font-semibold text-white">Profile Details</h2>
+								<div className="space-y-1.5 sm:space-y-2">
+									<label htmlFor="bio" className="text-xs sm:text-sm font-medium text-gray-300">Bio</label>
+									<textarea id="bio" name="bio" value={profileForm.values.bio} onChange={profileForm.handleChange} rows="3" className={`w-full rounded-lg border ${profileForm.errors.bio ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="Write a short bio about yourself..."></textarea>
 									{profileForm.errors.bio && <p className="text-xs text-red-400 mt-1">{profileForm.errors.bio}</p>}
 								</div>
-								<div className="grid gap-4 grid-cols-2">
-									<div className="space-y-2">
-										<label htmlFor="location" className="text-sm font-medium text-gray-300">Location</label>
-										<input type="text" id="location" name="location" value={profileForm.values.location} onChange={profileForm.handleChange} className={`w-full rounded-lg border ${profileForm.errors.location ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="City, Country" />
+								<div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="location" className="text-xs sm:text-sm font-medium text-gray-300">Location</label>
+										<input type="text" id="location" name="location" value={profileForm.values.location} onChange={profileForm.handleChange} className={`w-full rounded-lg border ${profileForm.errors.location ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="City, Country" />
 										{profileForm.errors.location && <p className="text-xs text-red-400 mt-1">{profileForm.errors.location}</p>}
 									</div>
-									<div className="space-y-2">
-										<label htmlFor="website" className="text-sm font-medium text-gray-300">Website</label>
-										<input type="text" id="website" name="website" value={profileForm.values.website} onChange={profileForm.handleChange} className={`w-full rounded-lg border ${profileForm.errors.website ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="https://yourwebsite.com" />
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="website" className="text-xs sm:text-sm font-medium text-gray-300">Website</label>
+										<input type="text" id="website" name="website" value={profileForm.values.website} onChange={profileForm.handleChange} className={`w-full rounded-lg border ${profileForm.errors.website ? 'border-red-500' : 'border-gray-700'} bg-gray-800 p-2.5 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="https://yourwebsite.com" />
 										{profileForm.errors.website && <p className="text-xs text-red-400 mt-1">{profileForm.errors.website}</p>}
 									</div>
 								</div>
 							</div>
 
-							<button type="submit" disabled={profileForm.isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-center font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60">
-								{profileForm.isSubmitting ? ("Saving...") : (<><Save className="h-5 w-5" /> Save Profile Changes</>)}
+							<button type="submit" disabled={profileForm.isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 sm:px-5 py-2.5 sm:py-3 text-center text-sm sm:text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60 touch-manipulation transition-colors">
+								{profileForm.isSubmitting ? ("Saving...") : (<><Save className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> Save Profile Changes</>)}
 							</button>
 						</form>
 					)}
 
 					{/* Profile Picture Section */}
 					{activeTab === "account" && (
-						<div className="space-y-6">
+						<div className="space-y-4 sm:space-y-6">
 							{uploadError && (
-								<div className="rounded-md bg-red-900/30 p-3 border border-red-900 text-sm text-red-400">
+								<div className="rounded-md bg-red-900/30 p-2.5 sm:p-3 border border-red-900 text-xs sm:text-sm text-red-400" role="alert">
 									{uploadError}
 								</div>
 							)}
-							<div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-								<h2 className="mb-4 text-xl font-semibold text-white">
+							<div className="rounded-lg border border-gray-800 bg-gray-900 p-3 sm:p-4">
+								<h2 className="mb-3 sm:mb-4 text-lg sm:text-xl font-semibold text-white">
 									Profile Picture
 								</h2>
 
-								<div className="flex flex-col items-center space-y-4">
+								<div className="flex flex-col items-center space-y-3 sm:space-y-4">
 									<div className="relative">
-										<div className="h-32 w-32 overflow-hidden rounded-full border-4 border-purple-600">
+										<div className="h-24 w-24 sm:h-32 sm:w-32 overflow-hidden rounded-full border-4 border-purple-600">
 											{profilePreview ? (
 												<img
 													src={profilePreview}
@@ -428,46 +436,49 @@ export default function SettingsPage() {
 												/>
 											) : (
 												<div className="flex h-full w-full items-center justify-center bg-gray-800">
-													<User className="h-16 w-16 text-gray-400" />
+													<User className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" aria-hidden="true" />
 												</div>
 											)}
 										</div>
 									</div>
 
-									<div className="flex flex-wrap gap-2">
+									<div className="flex flex-wrap justify-center gap-2">
 										<input
 											type="file"
 											ref={fileInputRef}
 											accept="image/*"
 											onChange={handleProfilePictureChange}
 											className="hidden"
+											aria-label="Upload profile picture"
 										/>
 										<button
 											type="button"
 											onClick={() => fileInputRef.current.click()}
-											className="flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-700"
+											className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-purple-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-purple-700 touch-manipulation transition-colors"
 										>
-											<Upload className="h-4 w-4" />
-											Upload New Picture
+											<Upload className="h-4 w-4" aria-hidden="true" />
+											<span className="hidden xs:inline">Upload New Picture</span>
+											<span className="xs:hidden">Upload</span>
 										</button>
 										{profilePreview && (
 											<button
 												type="button"
 												onClick={deleteProfilePicture}
-												className="flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700"
+												className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-red-700 touch-manipulation transition-colors"
 											>
-												Remove Picture
+												<span className="hidden xs:inline">Remove Picture</span>
+												<span className="xs:hidden">Remove</span>
 											</button>
 										)}
 									</div>
 									{profileFile && (
-										<div className="mt-2 text-sm text-gray-300">
-											Selected: {profileFile.name}
+										<div className="mt-2 text-xs sm:text-sm text-gray-300 text-center px-2">
+											Selected: <span className="font-medium truncate inline-block max-w-[200px] align-bottom">{profileFile.name}</span>
 										</div>
 									)}
 								</div>
 
-								<div className="mt-4 rounded-lg bg-gray-800 p-3 text-sm text-gray-300">
+								<div className="mt-3 sm:mt-4 rounded-lg bg-gray-800 p-2.5 sm:p-3 text-xs sm:text-sm text-gray-300">
 									<p>
 										Recommended: Square image, at least 400x400 pixels. Maximum
 										size: 2MB.
@@ -479,9 +490,9 @@ export default function SettingsPage() {
 								<button
 									onClick={uploadProfilePicture}
 									disabled={isUploadingPicture}
-									className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-center font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60"
+									className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 sm:px-5 py-2.5 sm:py-3 text-center text-sm sm:text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60 touch-manipulation transition-colors"
 								>
-									{isUploadingPicture ? ("Uploading...") : (<><Save className="h-5 w-5" /> Save New Profile Picture</>)}
+									{isUploadingPicture ? ("Uploading...") : (<><Save className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> Save New Profile Picture</>)}
 								</button>
 							)}
 						</div>
@@ -489,92 +500,92 @@ export default function SettingsPage() {
 
 					{/* Password Section */}
 					{activeTab === "password" && (
-						<form onSubmit={passwordForm.handleSubmit} className="space-y-6">
+						<form onSubmit={passwordForm.handleSubmit} className="space-y-4 sm:space-y-6">
 							{passwordForm.submitError && (
-								<div className="rounded-md bg-red-900/30 p-3 border border-red-900 text-sm text-red-400">
+								<div className="rounded-md bg-red-900/30 p-2.5 sm:p-3 border border-red-900 text-xs sm:text-sm text-red-400" role="alert">
 									{passwordForm.submitError}
 								</div>
 							)}
-							<div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
-								<h2 className="text-xl font-semibold text-white">Change Password</h2>
-								<div className="space-y-4">
-									<div className="space-y-2">
-										<label htmlFor="currentPassword" className="text-sm font-medium text-gray-300">Current Password</label>
+							<div className="space-y-3 sm:space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-3 sm:p-4">
+								<h2 className="text-lg sm:text-xl font-semibold text-white">Change Password</h2>
+								<div className="space-y-3 sm:space-y-4">
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="currentPassword" className="text-xs sm:text-sm font-medium text-gray-300">Current Password</label>
 										<div className="relative">
-											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-5 w-5" /></span>
+											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></span>
 											<input type={showPassword ? "text" : "password"} id="currentPassword" name="currentPassword" value={passwordForm.values.currentPassword} onChange={passwordForm.handleChange}
-												className={`w-full rounded-lg border ${passwordForm.errors.currentPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 pl-10 pr-10 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="Enter your current password" />
-											<button type="button" className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400" onClick={() => setShowPassword(!showPassword)}><Eye className="h-5 w-5" /></button>
+												className={`w-full rounded-lg border ${passwordForm.errors.currentPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 sm:py-2.5 pl-10 pr-10 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="Enter your current password" />
+											<button type="button" className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 touch-manipulation" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}><Eye className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></button>
 										</div>
 										{passwordForm.errors.currentPassword && <p className="text-xs text-red-400 mt-1">{passwordForm.errors.currentPassword}</p>}
 									</div>
-									<div className="space-y-2">
-										<label htmlFor="newPassword" className="text-sm font-medium text-gray-300">New Password</label>
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="newPassword" className="text-xs sm:text-sm font-medium text-gray-300">New Password</label>
 										<div className="relative">
-											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-5 w-5" /></span>
+											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></span>
 											<input type={showPassword ? "text" : "password"} id="newPassword" name="newPassword" value={passwordForm.values.newPassword} onChange={passwordForm.handleChange}
-												className={`w-full rounded-lg border ${passwordForm.errors.newPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 pl-10 pr-10 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="Enter new password" />
+												className={`w-full rounded-lg border ${passwordForm.errors.newPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 sm:py-2.5 pl-10 pr-10 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="Enter new password" />
 										</div>
 										{passwordForm.errors.newPassword ? <p className="text-xs text-red-400 mt-1">{passwordForm.errors.newPassword}</p> : <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>}
 									</div>
-									<div className="space-y-2">
-										<label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">Confirm New Password</label>
+									<div className="space-y-1.5 sm:space-y-2">
+										<label htmlFor="confirmPassword" className="text-xs sm:text-sm font-medium text-gray-300">Confirm New Password</label>
 										<div className="relative">
-											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-5 w-5" /></span>
+											<span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><Lock className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /></span>
 											<input type={showPassword ? "text" : "password"} id="confirmPassword" name="confirmPassword" value={passwordForm.values.confirmPassword} onChange={passwordForm.handleChange}
-												className={`w-full rounded-lg border ${passwordForm.errors.confirmPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 pl-10 pr-10 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500`} placeholder="Confirm new password" />
+												className={`w-full rounded-lg border ${passwordForm.errors.confirmPassword ? 'border-red-500' : 'border-gray-700'} bg-gray-800 py-2 sm:py-2.5 pl-10 pr-10 text-sm sm:text-base text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors`} placeholder="Confirm new password" />
 										</div>
 										{passwordForm.errors.confirmPassword && <p className="text-xs text-red-400 mt-1">{passwordForm.errors.confirmPassword}</p>}
 									</div>
 								</div>
 							</div>
-							<button type="submit" disabled={passwordForm.isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-center font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60">
-								{passwordForm.isSubmitting ? ("Updating...") : (<><Save className="h-5 w-5" /> Update Password</>)}
+							<button type="submit" disabled={passwordForm.isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 sm:px-5 py-2.5 sm:py-3 text-center text-sm sm:text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-60 touch-manipulation transition-colors">
+								{passwordForm.isSubmitting ? ("Updating...") : (<><Save className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> Update Password</>)}
 							</button>
 						</form>
 					)}
 
 					{/* Danger Zone Section */}
 					{activeTab === "danger" && (
-						<div className="space-y-6">
-							<div className="rounded-lg border border-red-900/50 bg-gray-900 p-6">
-								<div className="flex items-start gap-4">
-									<div className="rounded-full bg-red-900/20 p-3">
-										<AlertTriangle className="h-6 w-6 text-red-500" />
+						<div className="space-y-4 sm:space-y-6">
+							<div className="rounded-lg border border-red-900/50 bg-gray-900 p-3 sm:p-6">
+								<div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+									<div className="rounded-full bg-red-900/20 p-2.5 sm:p-3 flex-shrink-0">
+										<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" aria-hidden="true" />
 									</div>
-									<div className="flex-1">
-										<h2 className="text-xl font-semibold text-white mb-2">
+									<div className="flex-1 min-w-0">
+										<h2 className="text-lg sm:text-xl font-semibold text-white mb-2">
 											Delete Account
 										</h2>
-										<p className="text-sm text-gray-300 mb-4">
+										<p className="text-xs sm:text-sm text-gray-300 mb-3 sm:mb-4">
 											Once you delete your account, there is no going back. This action is permanent and cannot be undone.
 										</p>
-										<div className="rounded-lg bg-red-900/10 border border-red-900/30 p-4 mb-4">
-											<p className="text-sm font-medium text-white mb-2">
+										<div className="rounded-lg bg-red-900/10 border border-red-900/30 p-3 sm:p-4 mb-3 sm:mb-4">
+											<p className="text-xs sm:text-sm font-medium text-white mb-2">
 												What happens when you delete your account:
 											</p>
-											<ul className="space-y-1 text-sm text-gray-400">
+											<ul className="space-y-1 text-xs sm:text-sm text-gray-400">
 												<li className="flex items-start gap-2">
-													<span className="text-red-500">•</span>
+													<span className="text-red-500 flex-shrink-0">•</span>
 													<span>Your account will be permanently deleted</span>
 												</li>
 												<li className="flex items-start gap-2">
-													<span className="text-red-500">•</span>
+													<span className="text-red-500 flex-shrink-0">•</span>
 													<span>All your personal information will be removed</span>
 												</li>
 												<li className="flex items-start gap-2">
-													<span className="text-red-500">•</span>
+													<span className="text-red-500 flex-shrink-0">•</span>
 													<span>Your posts and comments will remain but show as "Deleted User"</span>
 												</li>
 												<li className="flex items-start gap-2">
-													<span className="text-red-500">•</span>
+													<span className="text-red-500 flex-shrink-0">•</span>
 													<span>You will not be able to recover your account</span>
 												</li>
 											</ul>
 										</div>
 										<button
 											onClick={() => setIsDeleteModalOpen(true)}
-											className="rounded-lg bg-red-600 px-5 py-2.5 font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20"
+											className="rounded-lg bg-red-600 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20 touch-manipulation transition-colors"
 										>
 											Delete My Account
 										</button>

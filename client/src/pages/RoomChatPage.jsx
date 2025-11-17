@@ -222,9 +222,9 @@ export default function RoomChatPage() {
 
 			{/* Privacy Notice */}
 			<div className="bg-blue-600/10 border-b border-blue-600/20">
-				<div className="container max-w-6xl mx-auto px-4 py-3">
-					<div className="flex items-center gap-2 text-sm text-blue-400">
-						<Shield className="h-4 w-4 flex-shrink-0" />
+				<div className="container max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+					<div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-blue-400">
+						<Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" aria-hidden="true" />
 						<span>
 							Your identity is anonymous. Messages will be deleted when this
 							room resets.
@@ -240,21 +240,21 @@ export default function RoomChatPage() {
 					onScroll={handleScroll}
 					className="h-full overflow-y-auto"
 				>
-					<div className="container max-w-4xl mx-auto px-4 py-6">
+					<div className="container max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-6">
 						{loadingMore && (
-							<div className="flex justify-center my-4">
-								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+							<div className="flex justify-center my-2 sm:my-4">
+								<div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-400" role="status" aria-label="Loading more messages"></div>
 							</div>
 						)}
 						{messages.length === 0 ? (
-							<div className="flex flex-col items-center justify-center h-full text-center">
-								<div className="mb-4 p-6 rounded-full bg-gray-800/50">
-									<Shield className="h-12 w-12 text-purple-400" />
+							<div className="flex flex-col items-center justify-center h-full text-center px-4">
+								<div className="mb-3 sm:mb-4 p-4 sm:p-6 rounded-full bg-gray-800/50">
+									<Shield className="h-10 w-10 sm:h-12 sm:w-12 text-purple-400" aria-hidden="true" />
 								</div>
-								<h3 className="text-xl font-semibold text-white mb-2">
+								<h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
 									Start the conversation
 								</h3>
-								<p className="text-gray-400 max-w-md">
+								<p className="text-sm sm:text-base text-gray-400 max-w-md">
 									Be the first to share your thoughts in this anonymous space.
 									Your identity is protected and messages will reset
 									periodically.

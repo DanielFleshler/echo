@@ -2,11 +2,13 @@ import {
 	Bell,
 	Home,
 	LogOut,
+	Menu,
 	Search,
 	Settings,
 	Sparkles,
 	User,
 	Users,
+	X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -25,6 +27,7 @@ export default function Header() {
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [notificationsAnchorRect, setNotificationsAnchorRect] = useState(null);
 	const [unreadCount, setUnreadCount] = useState(0);
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const location = useLocation();
 
 	const handleLogout = async () => {
@@ -71,6 +74,14 @@ export default function Header() {
 		setIsNotificationsOpen(false);
 	};
 
+	const handleToggleMobileMenu = () => {
+		setIsMobileMenuOpen(!isMobileMenuOpen);
+	};
+
+	const handleCloseMobileMenu = () => {
+		setIsMobileMenuOpen(false);
+	};
+
 	const isActive = (path) => {
 		return (
 			location.pathname === path || location.pathname.startsWith(`${path}/`)
@@ -83,10 +94,27 @@ export default function Header() {
 		return () => clearInterval(interval);
 	}, []);
 
+	useEffect(() => {
+		handleCloseMobileMenu();
+	}, [location.pathname]);
+
 	return (
 		<>
 			<header className="sticky top-0 z-20 border-b border-gray-800/20 bg-gray-950/80 backdrop-blur-xl shadow-lg shadow-black/10">
 				<div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+					{/* Mobile hamburger menu */}
+					<button
+						onClick={handleToggleMobileMenu}
+						className="md:hidden flex items-center p-2 text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 rounded-lg"
+						aria-label="Toggle menu"
+					>
+						{isMobileMenuOpen ? (
+							<X className="h-6 w-6" />
+						) : (
+							<Menu className="h-6 w-6" />
+						)}
+					</button>
+
 					{/* Logo */}
 					<div className="flex items-center gap-2">
 						<Link to="/" className="flex items-center gap-2 group">
@@ -97,8 +125,8 @@ export default function Header() {
 						</Link>
 					</div>
 
-					{/* Navigation - Icons only on mobile, text on desktop */}
-					<nav className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+					{/* Navigation - Hidden on mobile, visible on desktop */}
+					<nav className="hidden md:flex items-center gap-2 sm:gap-4 lg:gap-6">
 						<Link
 							to="/"
 							className={`flex items-center gap-1.5 transition-all duration-200 p-2 rounded-lg touch-manipulation ${
@@ -137,7 +165,7 @@ export default function Header() {
 							onClick={handleToggleNotifications}
 							className="flex items-center gap-1.5 text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 p-2 rounded-lg relative touch-manipulation"
 							aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
-							aria-expanded={showNotifications}
+							aria-expanded={isNotificationsOpen}
 						>
 							<Bell className="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true" />
 							<span className="hidden md:inline text-sm font-medium">Notifications</span>
@@ -200,6 +228,69 @@ export default function Header() {
 					)}
 				</div>
 			</header>
+
+			{/* Mobile Menu Overlay */}
+			{isMobileMenuOpen && (
+				<>
+					{/* Backdrop */}
+					<div
+						className="fixed inset-0 bg-black/50 z-30 md:hidden"
+						onClick={handleCloseMobileMenu}
+					/>
+					{/* Mobile Menu */}
+					<div className="fixed top-14 left-0 right-0 bottom-0 bg-gray-900 z-40 md:hidden overflow-y-auto">
+						<nav className="flex flex-col p-4 gap-2">
+							<Link
+								to="/"
+								className={`flex items-center gap-3 p-4 rounded-lg transition-all duration-200 ${
+									isActive("/")
+										? "text-purple-400 bg-purple-500/10"
+										: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
+								}`}
+							>
+								<Home className="h-5 w-5" />
+								<span className="text-base font-medium">Feed</span>
+							</Link>
+							<Link
+								to="/rooms"
+								className={`flex items-center gap-3 p-4 rounded-lg transition-all duration-200 ${
+									isActive("/rooms")
+										? "text-purple-400 bg-purple-500/10"
+										: "text-gray-200 hover:text-purple-400 hover:bg-gray-800/50"
+								}`}
+							>
+								<Users className="h-5 w-5" />
+								<span className="text-base font-medium">Rooms</span>
+							</Link>
+							<button
+								onClick={() => {
+									handleCloseMobileMenu();
+									handleOpenSearch();
+								}}
+								className="flex items-center gap-3 p-4 rounded-lg text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 text-left"
+							>
+								<Search className="h-5 w-5" />
+								<span className="text-base font-medium">Search</span>
+							</button>
+							<button
+								onClick={() => {
+									handleCloseMobileMenu();
+									handleToggleNotifications();
+								}}
+								className="flex items-center gap-3 p-4 rounded-lg text-gray-200 hover:text-purple-400 hover:bg-gray-800/50 transition-all duration-200 text-left relative"
+							>
+								<Bell className="h-5 w-5" />
+								<span className="text-base font-medium">Notifications</span>
+								{unreadCount > 0 && (
+									<span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-purple-500 text-xs font-bold text-white">
+										{unreadCount > 9 ? "9+" : unreadCount}
+									</span>
+								)}
+							</button>
+						</nav>
+					</div>
+				</>
+			)}
 
 			{/* Floating Bubble Search */}
 			<SearchModal
