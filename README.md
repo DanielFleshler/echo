@@ -6,6 +6,8 @@
 
 **A full-stack ephemeral social media platform built with the MERN stack**
 
+**[Live Demo](https://echo-lxld.onrender.com/)**
+
 </div>
 
 ---
@@ -20,11 +22,11 @@ Echo is a modern social media platform where authenticity meets ephemerality. Bu
 
 - 🏗️ **Full-Stack Architecture** - Designed and implemented complete MERN stack application from scratch
 - 🔐 **Secure Authentication** - Built comprehensive auth system with JWT, refresh tokens, and email verification
-- 📱 **Real-Time Features** - Implemented batch view tracking, polling-based notifications, and optimized data synchronization
+- 📱 **Real-Time Features** - Implemented Socket.io for anonymous chat rooms, batch view tracking, polling-based notifications, and optimized data synchronization
 - 🎨 **Modern UI/UX** - Created responsive, accessible interface with Tailwind CSS and dark mode
 - ☁️ **Cloud Integration** - Integrated Cloudinary for scalable media storage and FFmpeg for video compression
 - 🚀 **Performance Optimization** - Implemented pagination, lazy loading, debouncing, and efficient state management
-- 🧪 **Production-Ready** - Built with error handling, security best practices, and scalable architecture
+- 🧪 **Production-Ready** - Built with error handling, Winston logging, security best practices, and scalable architecture
 
 ---
 
@@ -163,6 +165,25 @@ Discover popular content with intelligent view tracking and trending calculation
 <tr>
 <td width="50%">
 
+### 💬 Anonymous Chat Rooms
+
+Join public chat rooms for real-time anonymous conversations without permanent message history.
+
+**Technical Implementation:**
+
+- Socket.io for bidirectional communication
+- Room-based messaging with join/leave events
+- Namespace isolation for room sockets
+- Winston logging for monitoring
+- Automatic cleanup on disconnect
+
+</td>
+<td width="50%">
+
+<img width="599" height="400" alt="Chat rooms interface showing real-time messaging" src="https://github.com/user-attachments/assets/placeholder-for-chat-image" />
+
+</td>
+</tr>
 
 </table>
 ## 🛠️ Technical Stack
@@ -181,15 +202,18 @@ Discover popular content with intelligent view tracking and trending calculation
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.1-000000?style=for-the-badge&logo=express&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-4.8-010101?style=for-the-badge&logo=socket.io&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.16-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Mongoose](https://img.shields.io/badge/Mongoose-8.13-880000?style=for-the-badge&logo=mongoose&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
+![Winston](https://img.shields.io/badge/Winston-Logging-23599d?style=for-the-badge)
 
 ### DevOps & Tools
 
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-Media-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 ![FFmpeg](https://img.shields.io/badge/FFmpeg-Compression-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)
 ![Brevo](https://img.shields.io/badge/Brevo-Email-0B996E?style=for-the-badge)
+![Render](https://img.shields.io/badge/Render-Hosting-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
 </div>
 
@@ -254,6 +278,26 @@ useEffect(() => {
   const interval = setInterval(fetchUnreadCount, 30000);
   return () => clearInterval(interval);
 }, []);
+```
+
+#### **6. Socket.io for Real-Time Chat**
+
+Implemented WebSocket-based chat rooms for anonymous real-time conversations:
+
+- **Namespace Isolation** - Separate `/rooms` namespace for chat functionality
+- **Room-Based Broadcasting** - Messages only sent to users in the same room
+- **User Tracking** - Maintain participant list with join/leave events
+- **Ephemeral by Design** - No message persistence, aligning with Echo's philosophy
+- **Production Logging** - Winston integration for monitoring and debugging
+
+```javascript
+// Room namespace with event handlers
+roomIo.on('connection', (socket) => {
+  socket.on('joinRoom', ({ roomId, username }) => {
+    socket.join(roomId);
+    roomIo.to(roomId).emit('userJoined', { username });
+  });
+});
 ```
 
 ---
@@ -479,7 +523,7 @@ CLOUDINARY_API_SECRET=...
 - [ ] **Real-time Messaging** - WebSocket-based DM system
 - [ ] **Advanced Search** - Full-text search for posts and comments with filters
 - [ ] **Browser Push Notifications** - Service worker for background notifications
-- [ ] **Anonymous Chat Rooms** - Complete backend integration
+- [ ] **Chat Room Enhancements** - Message persistence, room moderation, private rooms
 - [ ] **WebSocket Notifications** - Upgrade from polling to real-time WebSocket connection
 
 ## 📂 Project Structure
@@ -501,9 +545,12 @@ echo/
 │   │   │   ├── ViewTrackingContext.jsx
 │   │   │   └── ToastContext.jsx
 │   │   ├── pages/           # Route pages
+│   │   │   ├── RoomsPage.jsx
+│   │   │   └── RoomChatPage.jsx
 │   │   ├── services/        # API integration layer
 │   │   │   ├── api.js
-│   │   │   └── user.service.js
+│   │   │   ├── user.service.js
+│   │   │   └── roomSocket.js
 │   │   ├── hooks/           # Custom React hooks
 │   │   └── utils/           # Helper functions
 │   └── package.json
@@ -515,23 +562,29 @@ echo/
     │   ├── userController.js
     │   ├── followerController.js
     │   ├── notificationController.js
-    │   └── searchController.js
+    │   ├── searchController.js
+    │   └── roomController.js
     ├── models/             # Mongoose schemas
     │   ├── userModel.js
     │   ├── postModel.js
     │   ├── followerModel.js
-    │   └── notificationModel.js
+    │   ├── notificationModel.js
+    │   └── roomModel.js
     ├── routes/             # API routes
     │   ├── userRoutes.js
     │   ├── postRoutes.js
     │   ├── followerRoutes.js
-    │   └── notificationRoutes.js
+    │   ├── notificationRoutes.js
+    │   └── roomRoutes.js
     ├── middlewares/        # Custom middleware
     │   ├── auth.js
     │   └── upload.js
+    ├── sockets/            # Socket.io handlers
+    │   └── roomSocket.js
     ├── utils/              # Helper functions
     │   ├── email/         # Email templates
-    │   └── media/         # Media processing
+    │   ├── media/         # Media processing
+    │   └── logger.js      # Winston logging
     └── package.json
 ```
 
@@ -608,22 +661,27 @@ echo/
 - Custom hooks for code reusability
 - React Router for navigation
 - Axios interceptors for API handling
+- Socket.io-client for real-time features
 - Responsive design with Tailwind CSS
 - Form validation and error handling
 - Optimistic UI updates
 - Debouncing and performance optimization
 - Polling architecture with cleanup patterns
 - Modal components with controlled state
+- Real-time event handling and cleanup
 
 ### Backend Development
 
 - RESTful API design
 - Express.js server architecture
+- Socket.io for real-time bidirectional communication
+- WebSocket namespace and room management
 - MongoDB database design with indexes
 - Mongoose ODM with schemas, middleware, and virtual properties
 - JWT authentication and authorization
 - File upload and processing
 - Email service integration
+- Winston logging for production monitoring
 - Cron jobs for scheduled tasks
 - MongoDB regex search with optimization
 - Conditional schema validation
