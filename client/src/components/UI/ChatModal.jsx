@@ -1,4 +1,4 @@
-import { X, WifiOff, Wifi } from "lucide-react";
+import { X, WifiOff, Wifi, ArrowLeft } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
@@ -67,14 +67,23 @@ export default function ChatModal({ isOpen, onClose }) {
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-sm">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-gray-950/80 backdrop-blur-sm">
 			<div
 				ref={modalRef}
-				className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl w-full max-w-4xl h-[600px] flex flex-col overflow-hidden"
+				className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl w-full max-w-4xl h-[calc(100vh-1rem)] md:h-[600px] flex flex-col overflow-hidden"
 			>
 				{/* Header */}
 				<div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
 					<div className="flex items-center gap-3">
+						{/* Back button for mobile */}
+						{activeConversation && recipient && (
+							<button
+								onClick={() => selectConversation(null)}
+								className="md:hidden p-1 rounded-full text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+							>
+								<ArrowLeft className="h-5 w-5" />
+							</button>
+						)}
 						{recipient ? (
 							<>
 								<ProfileAvatar
@@ -121,7 +130,7 @@ export default function ChatModal({ isOpen, onClose }) {
 
 				<div className="flex flex-1 overflow-hidden">
 					{/* Conversations List */}
-					<div className="w-1/3 border-r border-gray-800 overflow-y-auto">
+					<div className={`${activeConversation ? 'hidden md:block' : 'block'} w-full md:w-1/3 border-r border-gray-800 overflow-y-auto`}>
 						{conversations.length > 0 ? (
 							conversations.map((convo) => (
 								<div
@@ -165,7 +174,7 @@ export default function ChatModal({ isOpen, onClose }) {
 					</div>
 
 					{/* Chat Area */}
-					<div className="flex-1 flex flex-col">
+					<div className={`${activeConversation ? 'flex' : 'hidden md:flex'} flex-1 flex-col`}>
 						{activeConversation && recipient ? (
 							<>
 								{/* Messages */}
