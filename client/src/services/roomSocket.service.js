@@ -6,12 +6,21 @@ const SOCKET_URL = API_CONFIG.SOCKET_URL;
 let socket = null;
 export const connectSocket = () => {
 	if (!socket) {
+		// Get JWT token from cookies for authentication
+		const token = document.cookie
+			.split('; ')
+			.find(row => row.startsWith('jwt='))
+			?.split('=')[1];
+
 		socket = io(SOCKET_URL, {
 			autoConnect: false,
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionAttempts: 5,
 			withCredentials: true,
+			auth: {
+				token: token
+			}
 		});
 	}
 	return socket;

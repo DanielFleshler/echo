@@ -77,13 +77,19 @@ io.use(async (socket, next) => {
 		}
 
 		let token;
-		if (socket.handshake.headers.cookie) {
+
+		// First, try to get token from auth parameter (mobile-friendly)
+		if (socket.handshake.auth && socket.handshake.auth.token) {
+			token = socket.handshake.auth.token;
+		}
+		// Fallback to cookie-based authentication
+		else if (socket.handshake.headers.cookie) {
 			const cookies = cookie.parse(socket.handshake.headers.cookie);
 			token = cookies.jwt;
 		}
 
 		if (!token) {
-			logger.error("No JWT token found in cookies");
+			logger.error("No JWT token found in auth or cookies");
 			return next(new Error("Authentication error: No token provided."));
 		}
 

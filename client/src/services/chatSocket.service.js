@@ -16,6 +16,12 @@ export const connectChatSocket = () => {
 		return chatSocket;
 	}
 
+	// Get JWT token from cookies for authentication
+	const token = document.cookie
+		.split('; ')
+		.find(row => row.startsWith('jwt='))
+		?.split('=')[1];
+
 	chatSocket = io(SOCKET_URL, {
 		autoConnect: SOCKET_CONFIG.AUTO_CONNECT,
 		reconnection: SOCKET_CONFIG.RECONNECTION,
@@ -23,6 +29,9 @@ export const connectChatSocket = () => {
 		reconnectionAttempts: SOCKET_CONFIG.RECONNECTION_ATTEMPTS,
 		withCredentials: SOCKET_CONFIG.WITH_CREDENTIALS,
 		transports: SOCKET_CONFIG.TRANSPORTS,
+		auth: {
+			token: token
+		}
 	});
 
 	chatSocket.on("connect", () => {
