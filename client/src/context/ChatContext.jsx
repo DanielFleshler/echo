@@ -126,7 +126,7 @@ export const ChatProvider = ({ children }) => {
 	const selectConversation = useCallback(
 		(conversationId) => {
 			setActiveConversation(conversationId);
-			if (!messages[conversationId]) {
+			if (conversationId && !messages[conversationId]) {
 				fetchMessages(conversationId);
 			}
 		},

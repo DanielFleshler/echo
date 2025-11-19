@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import MessageSidebar from "../components/UI/MessageSidebar";
 import ProfileAvatar from "../components/UI/ProfileAvatar";
 import ChatMessageItem from "../components/chat/ChatMessageItem";
-import ChatInputField from "../components/chat/ChatInputField";
+import ChatInput from "../components/chat/ChatInput";
 import { sendChatMessage } from "../services/chatSocket.service";
 
 const MessagesPage = () => {
@@ -40,14 +40,14 @@ const MessagesPage = () => {
 	};
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-4 py-4">
+		<div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 px-4 py-4">
 			{/* Message Sidebar - Full width on mobile, 1 col on desktop */}
-			<div className={`${activeConversation ? 'hidden lg:block' : 'block'}`}>
+			<div className={`${activeConversation ? 'hidden md:block' : 'block'}`}>
 				<MessageSidebar />
 			</div>
 
 			{/* Chat Area - Hidden on mobile if no conversation selected */}
-			<div className={`lg:col-span-3 bg-gray-900/40 rounded-xl border border-gray-800/50 flex flex-col min-h-[600px] ${!activeConversation ? 'hidden lg:flex' : 'flex'}`}>
+			<div className={`md:col-span-3 bg-gray-900/40 rounded-xl border border-gray-800/50 flex flex-col min-h-[600px] ${!activeConversation ? 'hidden md:flex' : 'flex'}`}>
 				{activeConversation && recipient ? (
 					<>
 						<div className="p-4 border-b border-gray-800 flex items-center gap-4">
@@ -70,7 +70,7 @@ const MessagesPage = () => {
 							))}
 							<div ref={messagesEndRef} />
 						</div>
-						<ChatInputField onSend={handleSendMessage} />
+						<ChatInput onSendMessage={handleSendMessage} variant="compact" />
 					</>
 				) : (
 					<div className="flex-1 flex items-center justify-center p-8">

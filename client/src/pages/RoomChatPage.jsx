@@ -277,7 +277,12 @@ export default function RoomChatPage() {
 			</div>
 
 			{/* Message Input */}
-			<ChatInput onSendMessage={handleSendMessage} />
+			<ChatInput
+				onSendMessage={handleSendMessage}
+				multiline={true}
+				showHint={true}
+				placeholder="Share your thoughts anonymously..."
+			/>
 		</div>
 	);
 }

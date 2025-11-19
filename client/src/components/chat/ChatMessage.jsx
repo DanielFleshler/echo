@@ -38,7 +38,7 @@ export default function ChatMessage({ message, previousMessage }) {
 		previousMessage &&
 		previousMessage.type !== "system" &&
 		previousMessage.anonymousId === message.anonymousId &&
-		!previousMessage.isOwn === !message.isOwn;
+		previousMessage.isOwn === message.isOwn;
 
 	return (
 		<div

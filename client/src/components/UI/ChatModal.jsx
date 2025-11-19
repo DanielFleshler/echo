@@ -1,14 +1,16 @@
 import { X, WifiOff, Wifi, ArrowLeft } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { sendChatMessage } from "../../services/chatSocket.service";
 import ProfileAvatar from "./ProfileAvatar";
 import ChatMessageItem from "../chat/ChatMessageItem";
-import ChatInputField from "../chat/ChatInputField";
+import ChatInput from "../chat/ChatInput";
 
 export default function ChatModal({ isOpen, onClose }) {
 	const { user } = useAuth();
+	const location = useLocation();
 	const {
 		messages,
 		activeConversation,
@@ -19,6 +21,14 @@ export default function ChatModal({ isOpen, onClose }) {
 	} = useChat();
 	const messagesEndRef = useRef(null);
 	const modalRef = useRef(null);
+
+	// Close modal when route changes
+	useEffect(() => {
+		if (isOpen) {
+			onClose();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [location.pathname]);
 
 	// Auto-scroll to bottom when new messages arrive
 	useEffect(() => {
@@ -67,10 +77,10 @@ export default function ChatModal({ isOpen, onClose }) {
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-gray-950/80 backdrop-blur-sm">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-gray-950/80 backdrop-blur-sm animate-modal-backdrop">
 			<div
 				ref={modalRef}
-				className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl w-full max-w-4xl h-[calc(100vh-1rem)] md:h-[600px] flex flex-col overflow-hidden"
+				className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl w-full max-w-3xl h-[85vh] md:h-[550px] flex flex-col overflow-hidden animate-modal-content"
 			>
 				{/* Header */}
 				<div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
@@ -197,10 +207,11 @@ export default function ChatModal({ isOpen, onClose }) {
 									<div ref={messagesEndRef} />
 								</div>
 								{/* Input */}
-								<ChatInputField
-									onSend={handleSendMessage}
+								<ChatInput
+									onSendMessage={handleSendMessage}
 									disabled={!recipient || !isSocketConnected}
 									isConnected={isSocketConnected}
+									variant="compact"
 								/>
 							</>
 						) : (
