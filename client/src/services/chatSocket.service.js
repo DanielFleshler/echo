@@ -16,11 +16,8 @@ export const connectChatSocket = () => {
 		return chatSocket;
 	}
 
-	// Get JWT token from cookies for authentication
-	const token = document.cookie
-		.split('; ')
-		.find(row => row.startsWith('jwt='))
-		?.split('=')[1];
+	// Get JWT token from localStorage for authentication
+	const token = localStorage.getItem("token");
 
 	chatSocket = io(SOCKET_URL, {
 		autoConnect: SOCKET_CONFIG.AUTO_CONNECT,
