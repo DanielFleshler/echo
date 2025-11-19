@@ -333,7 +333,7 @@ export default function SignupPage() {
 			</div>
 
 			{/* Right Column - Hero Image */}
-			<div className="flex-1 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
+			<div className="hidden lg:flex flex-1 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20"></div>
 				<div className="relative flex h-full flex-col items-center justify-center p-10 text-white">
 					<div className="max-w-md space-y-6">

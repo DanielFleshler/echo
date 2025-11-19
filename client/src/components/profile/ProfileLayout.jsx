@@ -3,10 +3,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePost } from "../../context/PostContext";
+import { useChat } from "../../context/ChatContext";
 import UserService from "../../services/user.service";
 import ErrorMessage from "../UI/ErrorMessage";
 import FollowersModal from "../UI/FollowersModal";
 import LoadingSpinner from "../UI/LoadingSpinner";
+import ChatModal from "../UI/ChatModal";
 import ProfileContent from "./ProfileContent";
 import ProfileHeader from "./ProfileHeader";
 import ProfileMedia from "./ProfileMedia";
@@ -19,6 +21,7 @@ export default function ProfileLayout({ userId }) {
 	const navigate = useNavigate();
 	const { fetchUserPosts, createPost, posts, loadingPosts, deletePost } =
 		usePost();
+	const { isChatModalOpen, closeChat } = useChat();
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [profileData, setProfileData] = useState(null);
@@ -264,6 +267,9 @@ export default function ProfileLayout({ userId }) {
 				initialTab={followersModalTab}
 				userId={profileData._id}
 			/>
+
+			{/* Chat Modal */}
+			<ChatModal isOpen={isChatModalOpen} onClose={closeChat} />
 		</div>
 	);
 }
